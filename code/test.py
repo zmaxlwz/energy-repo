@@ -130,8 +130,6 @@ if __name__ == "__main__":
     #-6.091731, 106.700762, 2016-07-02 23:04:04, 2016-07-03 10:50:34
     #-6.091731, 106.989617, 2016-07-02 23:02:54, 2016-07-03 10:49:25
 
-
-
     testObj = TestSun(timezone, latitude, longitude)
     testObj.getInputDatetime(year, month, day, hour, minute, second)
     testObj.computeSunriseTime()

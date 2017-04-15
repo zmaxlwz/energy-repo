@@ -72,9 +72,12 @@ class EnergyConsumption:
         #assets = [(100280, -6.097081, 106.978368)]
         #assets = self.getAssetsList()
         #print(assets)
+        count = 0
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')
             for asset in assets:
+                count += 1
+                print(count)
                 id, latitude, longitude = asset
                 results = self.computeEnergyForOneAsset(id, latitude, longitude)
                 for record in results:

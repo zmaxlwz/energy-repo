@@ -7,6 +7,23 @@ class EnergyConsumption:
 
     def __init__(self):
         
+        #define threshold: 2 watt
+        self.threshold = 2        
+        #1 day delta
+        self.oneDayDelta = datetime.timedelta(days=1)
+        #sunrise adjusted time delta - sunrise time should add this delta
+        self.sunriseTimeDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
+        #sunset adjusted time delta - sunset time should minus this delta
+        self.sunsetTimeDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
+        #sunrise dict
+        self.sunriseTimeDict = {}
+        #sunset dict
+        self.sunsetTimeDict = {}
+
+    def connectDB(self):
+        """ build connection to the database
+
+        """    
         #connect to the database
         try:
             self.conn = psycopg2.connect("dbname='jakarta_utara' user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'")
@@ -16,12 +33,16 @@ class EnergyConsumption:
             print(e)
 
         #define cursor
-        self.cur = self.conn.cursor()
+        self.cur = self.conn.cursor()    
 
-        #define threshold: 2 watt
-        self.threshold = 2
-        
-        #pass
+    def run(self):
+        """  call this method to run the program
+
+        """
+        #step 1:  read from json config file
+        #step 2:  connect to db
+        #step 3:  
+        pass
 
     def computeResults(self):
         """ compute results
@@ -74,11 +95,9 @@ class EnergyConsumption:
         #get last date
         #last_date = datetime.datetime(2017, 2, 7)
         last_date = self.getLastMeterReadingDate(id)
-        #1 day delta
-        oneDayDelta = datetime.timedelta(days=1)
         
         date = datetime.datetime.combine(commissioning_date, datetime.time(hour=8))
-        date = date + oneDayDelta
+        date = date + self.oneDayDelta
         results = []
         if last_date is None:
             return results
@@ -88,7 +107,7 @@ class EnergyConsumption:
             if onTime > 1800:
                 #print(date.date(), id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
                 results.append((date.date(), id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts))
-            date += oneDayDelta  
+            date += self.oneDayDelta  
 
         return results      
 
@@ -158,13 +177,32 @@ class EnergyConsumption:
         sunset_datetime = dayStartTime + time_delta
         #print(sunset_datetime)
         #compute adjusted daytime start time and daytime end time
-        halfHourDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
-        adjustedStartTime = sunrise_datetime + halfHourDelta
+        #halfHourDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
+        adjustedStartTime = sunrise_datetime + self.sunriseTimeDelta
         #print(adjustedStartTime)
-        adjustedEndTime = sunset_datetime - halfHourDelta
+        adjustedEndTime = sunset_datetime - self.sunsetTimeDelta
         #print(adjustedEndTime)
         return (adjustedStartTime, adjustedEndTime)
 
+    def computeSunTime(self, latitude, longitude, startDate, endDate):
+        """ this method will compute the sunrise and sunset time for each date between [startDate, endDate]
+            based on the given latitude and longitude, and create a dictionary
+            fact: the suntime for each light position in Jakarta will not differ by more than 1.5 minutes
+
+            Args:
+                latitude:  double variable, the latitude of a given light location
+                longitude: double variable, the longitude of a given light location
+                startDate: datetime.date() variable, the start of a time period
+                endDate:   datetime.date() variable, the end of a time period 
+        """    
+        self.sun = sun(lat=latitude, long=longitude)
+        dateTime = datetime.datetime.combine(startDate, datetime.time(hour=8))
+        while dateTime.date() < endDate:        
+            daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(dateTime)
+            self.sunriseTimeDict[dateTime.date()] = daytimeStart
+            self.sunsetTimeDict[dateTime.date()] = daytimeEnd
+            dateTime += self.oneDayDelta
+    
     def computeEnergyForOneDay(self, asset_id, daytimeStart, daytimeEnd):
         """ accumulate the light 'on' time and energy consumption during daytime
 
@@ -214,7 +252,17 @@ class EnergyConsumption:
 
 
 if __name__ == "__main__":
-	energyConsumption = EnergyConsumption()
-	energyConsumption.computeResults()
+    #print("start...")
+    energyConsumption = EnergyConsumption()
+    #print("after initialization...")
+	#energyConsumption.computeResults()
+    latitude = -6.218868
+    longitude = 106.845189
+    startDate = datetime.date(2017,1,1)
+    endDate = datetime.date(2017,1,10)
+    #print("start program...")
+    energyConsumption.computeSunTime(latitude, longitude, startDate, endDate)
+    print(energyConsumption.sunriseTimeDict)
+    print(energyConsumption.sunsetTimeDict)
 
 

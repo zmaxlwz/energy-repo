@@ -35,7 +35,8 @@ class EnergyConsumption:
         """    
         #connect to the database
         try:
-            self.conn = psycopg2.connect("dbname=%s user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'", (self.dbname,))
+            print(self.dbname)
+            self.conn = psycopg2.connect("dbname=%s user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'" % (self.dbname,))
             print("connected!")
         except psycopg2.Error as e:
             print("I am unable to connect to the database")

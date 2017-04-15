@@ -2,6 +2,7 @@ import datetime
 from sunrise import sun 
 import psycopg2
 import csv
+import sys
 
 class EnergyConsumption:
 
@@ -279,7 +280,7 @@ class EnergyConsumption:
 
 if __name__ == "__main__":
 
-    outputFilename = argv[1]
+    outputFilename = sys.argv[1]
     energyConsumption = EnergyConsumption(outputFilename)    
     energyConsumption.run()
     

@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     outputFilename = argv[1]
     energyConsumption = EnergyConsumption(outputFilename)    
-	energyConsumption.computeResults()
+    energyConsumption.run()
     
     
 

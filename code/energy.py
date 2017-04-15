@@ -119,6 +119,7 @@ class EnergyConsumption:
         #day = 1
         #date = datetime.datetime(year, month, day, 8, 0, 0)
         #commissioning_date = self.getCommissioningDate(id)    #which is datetime.date() object
+        print(asset)
         id, lat, long, installation_date, commissioning_date = asset
         #get last date
         #last_date = datetime.datetime(2017, 2, 7)

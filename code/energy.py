@@ -51,7 +51,7 @@ class EnergyConsumption:
         """
         #step 1:  read from json config file, get db connect parameter, time period to check, output file name
         self.startDate = datetime.date(2017, 1, 1)
-        self.endDate = datetime.date(2017, 1, 7)
+        self.endDate = datetime.date(2017, 1, 31)
         latitude = -6.218868
         longitude = 106.845189
         #step 2:  connect to db

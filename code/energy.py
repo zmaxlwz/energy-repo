@@ -6,14 +6,16 @@ import sys
 
 class EnergyConsumption:
 
-    def __init__(self, outputFilename):
+    def __init__(self, outputFilename, dbName, energyThreshold):
         """ initialize variables
 
         """
         #output filename
         self.outputFilename = outputFilename
+        #db name
+        self.dbname = dbName
         #define energyThreshold: 2 watt
-        self.energyThreshold = 2        
+        self.energyThreshold = int(energyThreshold)      
         #define onTime threshold for a day: in seconds
         self.onTimeThreshold = 0
         #1 day delta
@@ -33,7 +35,7 @@ class EnergyConsumption:
         """    
         #connect to the database
         try:
-            self.conn = psycopg2.connect("dbname='jakarta_utara' user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'")
+            self.conn = psycopg2.connect("dbname=%s user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'", (self.dbname,))
             print("connected!")
         except psycopg2.Error as e:
             print("I am unable to connect to the database")
@@ -284,7 +286,9 @@ class EnergyConsumption:
 if __name__ == "__main__":
 
     outputFilename = sys.argv[1]
-    energyConsumption = EnergyConsumption(outputFilename)    
+    dbName = sys.argv[2]
+    energyThreshold = sys.argv[3]
+    energyConsumption = EnergyConsumption(outputFilename, dbName, energyThreshold)    
     energyConsumption.run()
     
     

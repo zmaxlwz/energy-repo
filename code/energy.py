@@ -247,8 +247,8 @@ class EnergyConsumption:
 
         try:
             self.cur.execute("select b.asset_id , a.kwh, a.timestamp_utc \
-                         from energy_meter_readings a, energy_metering_points b \
-                         where a.metering_point_id = b.id and b.asset_id = %s \
+                         from energy_metering_points b, energy_meter_readings a \
+                         where b.asset_id = %s and b.id = a.metering_point_id \
                             and a.timestamp_utc >= %s and a.timestamp_utc <= %s \
                          order by a.timestamp_utc", (asset_id, daytimeStart, daytimeEnd))
         except:

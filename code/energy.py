@@ -5,10 +5,16 @@ import csv
 
 class EnergyConsumption:
 
-    def __init__(self):
-        
-        #define threshold: 2 watt
-        self.threshold = 2        
+    def __init__(self, outputFilename):
+        """ initialize variables
+
+        """
+        #output filename
+        self.outputFilename = outputFilename
+        #define energyThreshold: 2 watt
+        self.energyThreshold = 2        
+        #define onTime threshold for a day: in seconds
+        self.onTimeThreshold = 0
         #1 day delta
         self.oneDayDelta = datetime.timedelta(days=1)
         #sunrise adjusted time delta - sunrise time should add this delta
@@ -39,12 +45,21 @@ class EnergyConsumption:
         """  call this method to run the program
 
         """
-        #step 1:  read from json config file
+        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
+        self.startDate = datetime.date(2017, 1, 1)
+        self.endDate = datetime.date(2017, 1, 31)
+        latitude = -6.218868
+        longitude = 106.845189
         #step 2:  connect to db
-        #step 3:  
-        pass
+        self.connectDB()
+        #step 3:  compute sunrise and sunset time 
+        self.computeSunTime(latitude, longitude, self.startDate, self.endDate)
+        #step 3:  get assets list
+        assets = self.getAssetsList()
+        #step 4:  call computeResults method
+        self.computeResults(assets)
 
-    def computeResults(self):
+    def computeResults(self, assets):
         """ compute results
 
         """    
@@ -53,9 +68,9 @@ class EnergyConsumption:
         #longitude = 106.894265
         #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
         #assets = [(100280, -6.097081, 106.978368)]
-        assets = self.getAssetsList()
+        #assets = self.getAssetsList()
         #print(assets)
-        with open("out.csv", "w") as csvFile:
+        with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')
             for asset in assets:
                 id, latitude, longitude = asset
@@ -82,7 +97,7 @@ class EnergyConsumption:
         """ compute the energy consumption for one asset
 
         """    
-        self.sun = sun(lat=lat, long=long)
+        #self.sun = sun(lat=lat, long=long)
         #get installation date
         installation_date = self.getInstallationDate(id)     #which is datetime.date() object
         #get commission date
@@ -94,19 +109,23 @@ class EnergyConsumption:
 
         #get last date
         #last_date = datetime.datetime(2017, 2, 7)
-        last_date = self.getLastMeterReadingDate(id)
+        last_meter_reading_datetime = self.getLastMeterReadingDate(id)
         
-        date = datetime.datetime.combine(commissioning_date, datetime.time(hour=8))
-        date = date + self.oneDayDelta
+        #date = datetime.datetime.combine(commissioning_date, datetime.time(hour=8))
+        #date = date + self.oneDayDelta
         results = []
-        if last_date is None:
+        if last_meter_reading_datetime is None:
             return results
+        date = max(commissioning_date, self.startDate)
+        last_date = min(last_meter_reading_datetime.date(), self.endDate)    
         while date < last_date:        
-            daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(date)
-            (onTime, energyConsumedKwh, energyConsumedWatts) = self.computeEnergyForOneDay(id, daytimeStart, daytimeEnd)
-            if onTime > 1800:
-                #print(date.date(), id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
-                results.append((date.date(), id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts))
+            #daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(date)
+            daytimeStart = self.sunriseTimeDict[date]
+            daytimeEnd = self.sunsetTimeDict[date]
+            (onTime, energyConsumedKwh, energyConsumedWatts, numIntervals, numPositiveIntervals) = self.computeEnergyForOneDay(id, daytimeStart, daytimeEnd)
+            if onTime > self.onTimeThreshold:
+                #print(date, id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
+                results.append((date, id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts, numIntervals, numPositiveIntervals))
             date += self.oneDayDelta  
 
         return results      
@@ -211,6 +230,7 @@ class EnergyConsumption:
         """   
         #daytimeStart = datetime.datetime(2016, 7, 1, 20, 3, 1)
         #daytimeEnd = datetime.datetime(2016, 7, 2, 10, 49, 18) 
+
         try:
             self.cur.execute("select b.asset_id , a.kwh, a.timestamp_utc \
                          from energy_meter_readings a, energy_metering_points b \
@@ -222,9 +242,10 @@ class EnergyConsumption:
 
         rows = self.cur.fetchall() 
         if len(rows) == 0:
-            return (0, 0, 0)
+            return (0, 0, 0, 0, 0)
         
         totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
+        num_interval, num_interval_positive = 0, 0
         lastEnergy, lastTime = None, None    
         for row in rows:   
             if lastTime is None:
@@ -239,30 +260,27 @@ class EnergyConsumption:
                 lastTime = currentTime 
                 if secondsInterval == 0:
                     continue
-                consumptionRate = (energyConsumed * 1000 / (secondsInterval / 3600.0))
+                num_interval += 1    
+                consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
                 #print(row)
                 #print(energyConsumed, consumptionRate, secondsInterval)
-                if consumptionRate > self.threshold:
+                if consumptionRate > self.energyThreshold:
                     totalOnTime += secondsInterval
                     totalEnergyConsumed += energyConsumed
-                    totalWatts += consumptionRate
-                   
+                    num_interval_positive += 1
+        if totalOnTime == 0:
+            totalWatts = 0
+        else:
+            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)               
         #print(totalOnTime, totalEnergyConsumed)
-        return totalOnTime, totalEnergyConsumed, totalWatts
+        return totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive
 
 
 if __name__ == "__main__":
-    #print("start...")
-    energyConsumption = EnergyConsumption()
-    #print("after initialization...")
-	#energyConsumption.computeResults()
-    latitude = -6.218868
-    longitude = 106.845189
-    startDate = datetime.date(2017,1,1)
-    endDate = datetime.date(2017,1,10)
-    #print("start program...")
-    energyConsumption.computeSunTime(latitude, longitude, startDate, endDate)
-    print(energyConsumption.sunriseTimeDict)
-    print(energyConsumption.sunsetTimeDict)
 
+    outputFilename = argv[1]
+    energyConsumption = EnergyConsumption(outputFilename)    
+	energyConsumption.computeResults()
+    
+    
 

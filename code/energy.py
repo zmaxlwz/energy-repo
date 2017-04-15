@@ -51,7 +51,7 @@ class EnergyConsumption:
         """
         #step 1:  read from json config file, get db connect parameter, time period to check, output file name
         self.startDate = datetime.date(2017, 1, 1)
-        self.endDate = datetime.date(2017, 1, 31)
+        self.endDate = datetime.date(2017, 1, 15)
         latitude = -6.218868
         longitude = 106.845189
         #step 2:  connect to db
@@ -81,8 +81,9 @@ class EnergyConsumption:
             for asset in assets:
                 count += 1
                 print(count)
-                id, latitude, longitude = asset
-                results = self.computeEnergyForOneAsset(id, latitude, longitude)
+                #id, latitude, longitude = asset
+                #results = self.computeEnergyForOneAsset(id, latitude, longitude)
+                results = self.computeEnergyForOneAsset(asset)
                 for record in results:
                     csvWriter.writerow(record)
 
@@ -91,7 +92,7 @@ class EnergyConsumption:
 
         """                
         try:
-            self.cur.execute("select id, latitude, longitude \
+            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
                               from assets \
                               where is_deleted = 'f' \
                               and installation_date is not null and commissioning_date is not null")
@@ -101,20 +102,24 @@ class EnergyConsumption:
         return self.cur.fetchall()
 
 
-    def computeEnergyForOneAsset(self, id, lat, long):
+    #def computeEnergyForOneAsset(self, id, lat, long):
+    def computeEnergyForOneAsset(self, asset):    
         """ compute the energy consumption for one asset
+
+        Args:
+            asset: a tuple, (id, latitude, longitude, installation_date, commissioning_date)
 
         """    
         #self.sun = sun(lat=lat, long=long)
         #get installation date
-        installation_date = self.getInstallationDate(id)     #which is datetime.date() object
+        #installation_date = self.getInstallationDate(id)     #which is datetime.date() object
         #get commission date
         #year = 2016
         #month = 7
         #day = 1
         #date = datetime.datetime(year, month, day, 8, 0, 0)
-        commissioning_date = self.getCommissioningDate(id)    #which is datetime.date() object
-
+        #commissioning_date = self.getCommissioningDate(id)    #which is datetime.date() object
+        id, lat, long, installation_date, commissioning_date = asset
         #get last date
         #last_date = datetime.datetime(2017, 2, 7)
         last_meter_reading_datetime = self.getLastMeterReadingDate(id)

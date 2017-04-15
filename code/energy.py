@@ -51,7 +51,7 @@ class EnergyConsumption:
         """
         #step 1:  read from json config file, get db connect parameter, time period to check, output file name
         self.startDate = datetime.date(2017, 1, 1)
-        self.endDate = datetime.date(2017, 1, 15)
+        self.endDate = datetime.date(2017, 1, 7)
         latitude = -6.218868
         longitude = 106.845189
         #step 2:  connect to db
@@ -119,7 +119,7 @@ class EnergyConsumption:
         #day = 1
         #date = datetime.datetime(year, month, day, 8, 0, 0)
         #commissioning_date = self.getCommissioningDate(id)    #which is datetime.date() object
-        print(asset)
+        #print(asset)
         id, lat, long, installation_date, commissioning_date = asset
         #get last date
         #last_date = datetime.datetime(2017, 2, 7)

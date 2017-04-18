@@ -3,6 +3,7 @@ from sunrise import sun
 import psycopg2
 import csv
 import sys
+import json
 
 class EnergyConsumption:
 

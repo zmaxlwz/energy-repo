@@ -116,10 +116,10 @@ if __name__ == "__main__":
     #Jakarta, Utara
     timezone = 'US/Pacific'
     #latitude = -6.346005
-    latitude = -6.091731
+    latitude = -6.218868
     #longitude = 106.700762
-    longitude = 106.989617
-    year, month, day, hour, minute, second = 2016, 7, 3, 8, 0, 0
+    longitude = 106.845189
+    year, month, day, hour, minute, second = 2016, 5, 28, 8, 0, 0
     #-6.346005, 106.700762, 2016-06-02 22:58:04, 2016-06-03 10:44:26
     #-6.346005, 106.989617, 2016-06-02 22:56:54, 2016-06-03 10:43:16
     #-6.091731, 106.700762, 2016-06-02 22:57:38, 2016-06-03 10:44:51

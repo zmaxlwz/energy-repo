@@ -183,4 +183,10 @@ class Test:
         
         return results
 
+
+if __name__ == "__main__":
+
+    configJSONFilename = sys.argv[1]
+    testObj = Test(configJSONFilename)    
+    testObj.run()
             

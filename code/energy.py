@@ -6,18 +6,12 @@ import sys
 
 class EnergyConsumption:
 
-    def __init__(self, outputFilename, dbName, energyThreshold):
+    def __init__(self, configJSONFilename):
         """ initialize variables
 
         """
-        #output filename
-        self.outputFilename = outputFilename
-        #db name
-        self.dbname = dbName
-        #define energyThreshold: 2 watt
-        self.energyThreshold = int(energyThreshold)      
-        #define onTime threshold for a day: in seconds
-        self.onTimeThreshold = 0
+        #configuration file name
+        self.configFilename = configJSONFilename
         #1 day delta
         self.oneDayDelta = datetime.timedelta(days=1)
         #sunrise adjusted time delta - sunrise time should add this delta
@@ -35,29 +29,53 @@ class EnergyConsumption:
         """    
         #connect to the database
         try:
-            print(self.dbname)
-            self.conn = psycopg2.connect("dbname=%s user='awsmaster' password='philips2017' host='citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com' port='5432'" % (self.dbname,))
+            print(self.pg_dbname)
+            self.conn = psycopg2.connect("dbname=%s user=%s password=%s host=%s port=%s" % (self.pg_dbname, self.pg_username, self.pg_password, self.pg_host, self.pg_port))
             print("connected!")
         except psycopg2.Error as e:
             print("I am unable to connect to the database")
             print(e)
 
         #define cursor
-        self.cur = self.conn.cursor()    
+        self.cur = self.conn.cursor()  
+
+    def getConfig(self, configFilename):
+        """ get configuration parameters
+
+        """    
+        with open(configFilename) as config_file:    
+            config_data = json.load(config_file)
+                    
+            self.pg_dbname = config_data['pg_dbname']
+            self.pg_username = config_data['pg_username']
+            self.pg_password = config_data['pg_password']
+            self.pg_host = config_data['pg_host']
+            self.pg_port = config_data['pg_port']
+            #output filename
+            self.outputFilename = config_data['output_csvfile_name']
+            #define energyThreshold: 2 watt
+            self.energyThreshold = int(config_data['energy_threshold'])  
+            #define onTime threshold for a day: in seconds
+            self.onTimeThreshold = int(config_data['onTime_threshold'])  
+            #period start date
+            self.startDate = datetime.datetime.strptime(config_data['period_start_date'], '%m/%d/%Y').date()
+            #period end date
+            self.endDate = datetime.datetime.strptime(config_data['period_end_date'], '%m/%d/%Y').date()
+            #suntime location latitude
+            self.suntime_latitude = config_data['suntime_location_latitude']
+            #suntime location longitude
+            self.suntime_longitude = config_data['suntime_location_longitude']
 
     def run(self):
         """  call this method to run the program
 
         """
         #step 1:  read from json config file, get db connect parameter, time period to check, output file name
-        self.startDate = datetime.date(2017, 1, 1)
-        self.endDate = datetime.date(2017, 1, 31)
-        latitude = -6.218868
-        longitude = 106.845189
+        self.getConfig(self.configFilename)
         #step 2:  connect to db
         self.connectDB()
         #step 3:  compute sunrise and sunset time 
-        self.computeSunTime(latitude, longitude, self.startDate, self.endDate)
+        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get assets list
         assets = self.getAssetsList()
         #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
@@ -292,10 +310,8 @@ class EnergyConsumption:
 
 if __name__ == "__main__":
 
-    outputFilename = sys.argv[1]
-    dbName = sys.argv[2]
-    energyThreshold = sys.argv[3]
-    energyConsumption = EnergyConsumption(outputFilename, dbName, energyThreshold)    
+    configJSONFilename = sys.argv[1]
+    energyConsumption = EnergyConsumption(configJSONFilename)    
     energyConsumption.run()
     
     

@@ -6,7 +6,7 @@ import sys
 
 class Test:
 
-	def __init__(self, configJSONFilename):
+    def __init__(self, configJSONFilename):
         """ initialize variables
 
         """

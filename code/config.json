@@ -7,8 +7,8 @@
         "output_csvfile_name": "result2.csv",
         "energy_threshold": "2",
         "onTime_threshold": "0",
-        "period_start_date": "1/1/2017",
-        "period_end_date": "1/31/2017",
+        "period_start_date": "5/23/2016",
+        "period_end_date": "5/28/2016",
         "suntime_location_latitude": "-6.218868",
         "suntime_location_longitude": "106.845189"
 }

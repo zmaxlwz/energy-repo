@@ -78,7 +78,8 @@ class EnergyConsumption:
         #step 3:  compute sunrise and sunset time 
         self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 4:  get assets list
-        assets = self.getAssetsList()
+        #assets = self.getAssetsList()
+        assets = [(3776, -6.118187, 106.894265)]
         #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
         #step 5:  call computeResults method
         self.computeResults(assets)

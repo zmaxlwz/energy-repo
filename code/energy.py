@@ -249,7 +249,7 @@ class EnergyConsumption:
         """    
         self.sun = sun(lat=latitude, long=longitude)
         dateTime = datetime.datetime.combine(startDate, datetime.time(hour=8))
-        while dateTime.date() < endDate:        
+        while dateTime.date() <= endDate:        
             daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(dateTime)
             self.sunriseTimeDict[dateTime.date()] = daytimeStart
             self.sunsetTimeDict[dateTime.date()] = daytimeEnd

@@ -79,7 +79,8 @@ class Test:
         #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get assets list
         #assets = self.getAssetsList()
-        assets = [(2490, -6.113218, 106.778701)]
+        #assets = [(2490, -6.113218, 106.778701)]
+        assets = [(3776, -6.118187, 106.894265)]
         #step 4:  call computeResults method
         self.computeResults(assets)
         
@@ -132,7 +133,7 @@ class Test:
         #date = date + self.oneDayDelta
         
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
-        timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=10)) 
+        timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23)) 
 
         return self.computeEnergyForEachInterval(id, timeStart, timeEnd)  
         

@@ -146,7 +146,7 @@ class ComputeDistribution:
                 csvWriter.writerow(results)
                 #self.plot(results)
 
-    def computeTimeDiff(component_id):
+    def computeTimeDiff(self, component_id):
         
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
         timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))

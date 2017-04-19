@@ -178,6 +178,7 @@ class ComputeDistribution:
                     #turn on light
                     sunsetTime = self.sunsetTimeDict[currentTime.date()]
                     secondsInterval = (sunsetTime - currentTime).total_seconds()
+                    print(sunsetTime, currentTime, secondsInterval)
                     results.append(secondsInterval)
 
                 lastLogValue = currentLogValue

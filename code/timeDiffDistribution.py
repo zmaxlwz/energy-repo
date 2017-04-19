@@ -77,12 +77,26 @@ class ComputeDistribution:
         self.connectDB()
         #step 3:  compute sunrise and sunset time 
         self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
-        #step 3:  get assets list
-        #assets = self.getAssetsList()
-        #assets = [(2490, -6.113218, 106.778701)]
-        component_id_list = [4980]
+        #step 3:  get components list
+        #component_id_list = [4980]
+        component_id_list = self.getComponentsList()
         #step 4:  call computeResults method
         self.computeResults(component_id_list)
+
+    def getComponentsList(self):
+        """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
+
+        """                
+        try:
+            self.cur.execute("select c.id, c.asset_id, c.installation_date \
+                              from assets as a, components as c \
+                              where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
+                              and a.id = c.asset_id and c.component_kind = 0")
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall()    
+        return [row[0] for row in rows]
 
     def computeDaytimeStartEnd(self, date):
         """

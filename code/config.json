@@ -4,11 +4,11 @@
         "pg_password": "philips2017",
         "pg_host": "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com",
         "pg_port": "5432",
-        "output_csvfile_name": "result4.csv",
+        "output_csvfile_name": "result5.csv",
         "energy_threshold": "2",
         "onTime_threshold": "0",
-        "period_start_date": "10/15/2016",
-        "period_end_date": "11/1/2016",
+        "period_start_date": "1/15/2017",
+        "period_end_date": "1/16/2017",
         "suntime_location_latitude": "-6.218868",
         "suntime_location_longitude": "106.845189"
 }

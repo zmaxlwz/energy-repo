@@ -5,7 +5,7 @@ import csv
 import sys
 import json
 
-class Test:
+class ComputeWatts:
 
     def __init__(self, configJSONFilename):
         """ initialize variables
@@ -189,6 +189,6 @@ class Test:
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
-    testObj = Test(configJSONFilename)    
+    testObj = ComputeWatts(configJSONFilename)    
     testObj.run()
             

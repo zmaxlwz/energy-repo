@@ -157,7 +157,8 @@ class ComputeDistribution:
                 #id, latitude, longitude = asset
                 #results = self.computeEnergyForOneAsset(id, latitude, longitude)
                 results = self.computeTimeDiff(component_id)
-                csvWriter.writerow(results)
+                if len(results) > 0:
+                    csvWriter.writerow(results)
                 #self.plot(results)
 
     def computeTimeDiff(self, component_id):

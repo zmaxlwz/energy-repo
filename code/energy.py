@@ -63,9 +63,9 @@ class EnergyConsumption:
             #period end date
             self.endDate = datetime.datetime.strptime(config_data['period_end_date'], '%m/%d/%Y').date()
             #suntime location latitude
-            self.suntime_latitude = config_data['suntime_location_latitude']
+            self.suntime_latitude = float(config_data['suntime_location_latitude'])
             #suntime location longitude
-            self.suntime_longitude = config_data['suntime_location_longitude']
+            self.suntime_longitude = float(config_data['suntime_location_longitude'])
 
     def run(self):
         """  call this method to run the program

@@ -154,12 +154,53 @@ class ComputeDistribution:
             for component_id in component_id_list:
                 count += 1
                 print(count)
-                #id, latitude, longitude = asset
-                #results = self.computeEnergyForOneAsset(id, latitude, longitude)
-                results = self.computeTimeDiff(component_id)
+                #results = self.computeTimeDiff(component_id)
+                results = self.computeTurnOnTime(component_id)
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
+    
+    def computeTurnOnTime(self, component_id):
+        """ using switching point table, compute the switching point turn-on time in minutes from day start
+            because most turn-on time appear between 9 - 10 am UTC, I constrain the range to be [6:00 - 13:00] UTC
+
+        """
+        timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
+        timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
+
+        try:
+            self.cur.execute("select component_id, timestamp_utc, log_value \
+                              from switching_points \
+                              where component_id = %s \
+                              and timestamp_utc > %s and timestamp_utc < %s  \
+                              order by timestamp_utc;", (component_id, timeStart, timeEnd))
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall() 
+        if len(rows) == 0:
+            return []
+
+        results = []
+        lastLogValue, lastTime = None, None    
+        for row in rows:   
+            if lastTime is None:                
+                lastTime = row[1]
+                lastLogValue = row[2]
+            else:                
+                currentTime = row[1]
+                currentLogValue = row[2]
+                               
+                if currentLogValue == 100 and lastLogValue == 0:
+                    #turn on light
+                    if currentTime.time() > datetime.time(6) and currentTime.time() < datetime.time(13):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                        results.append(minutesFromDayStart)
+                    
+                lastLogValue = currentLogValue
+                lastTime = currentTime 
+        
+        return results    
 
     def computeTimeDiff(self, component_id):
         

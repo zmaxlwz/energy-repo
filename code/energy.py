@@ -62,6 +62,8 @@ class EnergyConsumption:
             self.startDate = datetime.datetime.strptime(config_data['period_start_date'], '%m/%d/%Y').date()
             #period end date
             self.endDate = datetime.datetime.strptime(config_data['period_end_date'], '%m/%d/%Y').date()
+            #commissioning date plus the number of days
+            self.commissioningDatePlusDays = int(config_data['commissioning_date_plus_days'])
             #suntime location latitude
             self.suntime_latitude = float(config_data['suntime_location_latitude'])
             #suntime location longitude
@@ -150,7 +152,8 @@ class EnergyConsumption:
         results = []
         if last_meter_reading_datetime is None:
             return results
-        date = max(commissioning_date, self.startDate)
+        valid_start_date = commissioning_date + datetime.timedelta(days=self.commissioningDatePlusDays)     
+        date = max(valid_start_date, self.startDate)
         last_date = min(last_meter_reading_datetime.date(), self.endDate)    
         while date < last_date:        
             #daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(date)

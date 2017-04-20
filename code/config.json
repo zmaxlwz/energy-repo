@@ -10,6 +10,12 @@
         "period_start_date": "7/1/2016",
         "period_end_date": "1/31/2017",
         "commissioning_date_plus_days": "3",
+        "sunrise_time_delta_hours": "0",
+        "sunrise_time_delta_minutes": "30",
+        "sunrise_time_delta_seconds": "0",
+        "sunset_time_delta_hours": "0",
+        "sunset_time_delta_minutes": "30",
+        "sunset_time_delta_seconds": "0",
         "suntime_location_latitude": "-6.218868",
         "suntime_location_longitude": "106.845189"
 }

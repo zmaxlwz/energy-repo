@@ -15,10 +15,7 @@ class EnergyConsumption:
         self.configFilename = configJSONFilename
         #1 day delta
         self.oneDayDelta = datetime.timedelta(days=1)
-        #sunrise adjusted time delta - sunrise time should add this delta
-        self.sunriseTimeDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
-        #sunset adjusted time delta - sunset time should minus this delta
-        self.sunsetTimeDelta = datetime.timedelta(hours=0, minutes=30, seconds=0)
+        
         #sunrise dict
         self.sunriseTimeDict = {}
         #sunset dict
@@ -64,6 +61,10 @@ class EnergyConsumption:
             self.endDate = datetime.datetime.strptime(config_data['period_end_date'], '%m/%d/%Y').date()
             #commissioning date plus the number of days
             self.commissioningDatePlusDays = int(config_data['commissioning_date_plus_days'])
+            #sunrise adjusted time delta - sunrise time should add this delta
+            self.sunriseTimeDelta = datetime.timedelta(hours=int(config_data['sunrise_time_delta_hours']), minutes=int(config_data['sunrise_time_delta_minutes']), seconds=int(config_data['sunrise_time_delta_seconds']))
+            #sunset adjusted time delta - sunset time should minus this delta
+            self.sunsetTimeDelta = datetime.timedelta(hours=int(config_data['sunset_time_delta_hours']), minutes=int(config_data['sunset_time_delta_minutes']), seconds=int(config_data['sunset_time_delta_seconds']))
             #suntime location latitude
             self.suntime_latitude = float(config_data['suntime_location_latitude'])
             #suntime location longitude

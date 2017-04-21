@@ -155,7 +155,8 @@ class ComputeDistribution:
                 count += 1
                 print(count)
                 #results = self.computeTimeDiff(component_id)
-                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOnTime(component_id)
+                results = self.computeTurnOffTime(component_id)
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
@@ -196,6 +197,51 @@ class ComputeDistribution:
                     if currentTime.time() > datetime.time(6) and currentTime.time() < datetime.time(13):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)
+                    
+                lastLogValue = currentLogValue
+                lastTime = currentTime 
+        
+        return results    
+
+    def computeTurnOffTime(self, component_id):   
+        """ using switching point table, compute the switching point turn-off time in minutes from day start
+            because most turn-off time appear between 10 - 12 pm UTC, I constrain the range to be [19:00 - 24:00] & [0:00 - 3:00] UTC
+
+        """
+        timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
+        timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
+
+        try:
+            self.cur.execute("select component_id, timestamp_utc, log_value \
+                              from switching_points \
+                              where component_id = %s \
+                              and timestamp_utc > %s and timestamp_utc < %s  \
+                              order by timestamp_utc;", (component_id, timeStart, timeEnd))
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall() 
+        if len(rows) == 0:
+            return []
+
+        results = []
+        lastLogValue, lastTime = None, None    
+        for row in rows:   
+            if lastTime is None:                
+                lastTime = row[1]
+                lastLogValue = row[2]
+            else:                
+                currentTime = row[1]
+                currentLogValue = row[2]
+                               
+                if currentLogValue == 0 and lastLogValue == 100:
+                    #turn on light
+                    if (currentTime.time() > datetime.time(19) and currentTime.time() <= datetime.time(23, 59, 59)):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date() + datetime.timedelta(days=1), datetime.time())).total_seconds() / 60.0
+                        results.append(minutesFromDayStart)
+                    elif (currentTime.time() > datetime.time(0) and currentTime.time() < datetime.time(3)):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                        results.append(minutesFromDayStart)    
                     
                 lastLogValue = currentLogValue
                 lastTime = currentTime 

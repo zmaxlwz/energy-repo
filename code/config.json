@@ -10,6 +10,8 @@
         "period_start_date": "7/1/2016",
         "period_end_date": "1/31/2017",
         "commissioning_date_plus_days": "3",
+        "daytime_start_time": "0:30:0",
+        "daytime_end_time": "9:30:0",
         "sunrise_time_delta_hours": "0",
         "sunrise_time_delta_minutes": "30",
         "sunrise_time_delta_seconds": "0",

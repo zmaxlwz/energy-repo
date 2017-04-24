@@ -87,11 +87,25 @@ class EnergyConsumption:
         #step 3:  compute sunrise and sunset time 
         #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 4:  get assets list
-        #assets = self.getAssetsList()
-        assets = [(3776, -6.118187, 106.894265, datetime.date(2016, 5, 27), datetime.date(2016, 6, 1))]
+        assets = self.getAssetsList()
+        #assets = [(3776, -6.118187, 106.894265, datetime.date(2016, 5, 27), datetime.date(2016, 6, 1))]
         #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
         #step 5:  call computeResults method
         self.computeResults(assets)
+
+    def getAssetsList(self):
+        """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
+
+        """                
+        try:
+            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
+                              from assets \
+                              where is_deleted = 'f' \
+                              and installation_date is not null and commissioning_date is not null")
+        except:
+            print("I am unable to get data")
+
+        return self.cur.fetchall()    
 
     def computeResults(self, assets):
         """ compute results
@@ -116,22 +130,6 @@ class EnergyConsumption:
                 for record in results:
                     csvWriter.writerow(record)
 
-    def getAssetsList(self):
-        """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
-
-        """                
-        try:
-            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
-                              from assets \
-                              where is_deleted = 'f' \
-                              and installation_date is not null and commissioning_date is not null")
-        except:
-            print("I am unable to get data")
-
-        return self.cur.fetchall()
-
-
-    #def computeEnergyForOneAsset(self, id, lat, long):
     def computeEnergyForOneAsset(self, asset):    
         """ compute the energy consumption for one asset
 
@@ -256,60 +254,6 @@ class EnergyConsumption:
             results.append((current_date, id, lat, long, installation_date, commissioning_date, totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
 
         return results      
-
-    def computeEnergyForOneDay(self, asset_id, daytimeStart, daytimeEnd):
-        """ accumulate the light 'on' time and energy consumption during daytime
-
-        return:  (onTime, EnergyConsumed)
-
-        """   
-        #daytimeStart = datetime.datetime(2016, 7, 1, 20, 3, 1)
-        #daytimeEnd = datetime.datetime(2016, 7, 2, 10, 49, 18) 
-
-        try:
-            self.cur.execute("select b.asset_id , a.kwh, a.timestamp_utc \
-                         from energy_metering_points b, energy_meter_readings a \
-                         where b.asset_id = %s and b.id = a.metering_point_id \
-                            and a.timestamp_utc >= %s and a.timestamp_utc <= %s \
-                         order by a.timestamp_utc", (asset_id, daytimeStart, daytimeEnd))
-        except:
-            print("I am unable to get data")
-
-        rows = self.cur.fetchall() 
-        if len(rows) == 0:
-            return (0, 0, 0, 0, 0)
-        
-        totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
-        num_interval, num_interval_positive = 0, 0
-        lastEnergy, lastTime = None, None    
-        for row in rows:   
-            if lastTime is None:
-                lastEnergy = row[1]
-                lastTime = row[2]
-            else:
-                currentEnergy = row[1]
-                currentTime = row[2]
-                secondsInterval = (currentTime - lastTime).total_seconds()
-                energyConsumed = currentEnergy - lastEnergy
-                lastEnergy = currentEnergy
-                lastTime = currentTime 
-                if secondsInterval == 0:
-                    continue
-                num_interval += 1    
-                consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
-                #print(row)
-                #print(energyConsumed, consumptionRate, secondsInterval)
-                if consumptionRate > self.energyThreshold:
-                    totalOnTime += secondsInterval
-                    totalEnergyConsumed += energyConsumed
-                    num_interval_positive += 1
-        if totalOnTime == 0:
-            totalWatts = 0
-        else:
-            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)               
-        #print(totalOnTime, totalEnergyConsumed)
-        return totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive
-    
 
     def getLastMeterReadingDate(self, id):
         """ get last meter reading date for the asset

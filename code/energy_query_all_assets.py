@@ -104,9 +104,13 @@ class EnergyConsumption:
         #step 5:  call computeResults method
         #self.computeResults(assets)
         self.get_assets_info()
+        print("got assets info")
         self.get_nominal_wattage()
+        print("got nominal wattage info")
         results = self.compute_energy_consumption()
+        print("finished computing")
         self.write_to_file(results)
+        print("finished output to files")
 
     def get_assets_info(self):
         """ get assets information from database, like latitude, longitude, installation_date, commissioning_date 
@@ -161,6 +165,8 @@ class EnergyConsumption:
         first_date_time = datetime.datetime.combine(self.startDate, datetime.time(0, 0, 0))
         last_date_time = datetime.datetime.combine(self.endDate, datetime.time(23, 59, 59))
 
+        print("before query for kwh data")
+
         try:
             self.cur.execute("select a.id , emr.kwh, emr.timestamp_utc \
                               from assets as a, energy_metering_points as emp, energy_meter_readings as emr \
@@ -170,6 +176,8 @@ class EnergyConsumption:
                               order by a.id, emr.timestamp_utc", (first_date_time, last_date_time))
         except:
             print("I am unable to get data")
+
+        print("finished query for kwh data")    
 
         rows = self.cur.fetchall() 
         if len(rows) == 0:

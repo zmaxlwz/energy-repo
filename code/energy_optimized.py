@@ -55,6 +55,8 @@ class EnergyConsumption:
             self.energyThreshold = int(config_data['energy_threshold'])  
             #define onTime threshold for a day: in seconds
             self.onTimeThreshold = int(config_data['onTime_threshold'])  
+            #define nominal wattage ratio
+            self.nominal_wattage_ratio = float(config_data['nominal_wattage_ratio'])
             #period start date
             self.startDate = datetime.datetime.strptime(config_data['period_start_date'], '%m/%d/%Y').date()
             #period end date
@@ -157,6 +159,22 @@ class EnergyConsumption:
         results = []
         if last_meter_reading_datetime is None:
             return results
+
+        #get nominal wattage of the luminaire
+        try:
+            self.cur.execute("select lt.id, l.id, lt.nominal_wattage, lt.actual_wattage \
+                              from luminaire_types lt, luminaires l, components c \
+                              where lt.id = l.luminaire_type_id \
+                              and l.id = c.id and c.asset_id = %s", (id,))
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall() 
+        nominal_wattage = 0
+        if len(rows) == 1:
+            nominal_wattage = rows[0][2]
+        print(nominal_wattage)    
+            
         valid_start_date = commissioning_date + datetime.timedelta(days=self.commissioningDatePlusDays)     
         first_date = max(valid_start_date, self.startDate)
         last_date = min(last_meter_reading_datetime.date(), self.endDate)    
@@ -224,7 +242,7 @@ class EnergyConsumption:
                 consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
                 #print(row)
                 #print(energyConsumed, consumptionRate, secondsInterval)
-                if consumptionRate > self.energyThreshold:
+                if consumptionRate > nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold:
                     totalOnTime += secondsInterval
                     totalEnergyConsumed += energyConsumed
                     num_interval_positive += 1

@@ -179,10 +179,6 @@ class EnergyConsumption:
 
         print("finished query for kwh data")    
 
-        rows = self.cur.fetchall() 
-        if len(rows) == 0:
-            return results
-
         current_asset_id = None
         count = 0
 

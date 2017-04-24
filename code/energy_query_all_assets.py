@@ -200,6 +200,7 @@ class EnergyConsumption:
                 current_asset_installation_date = self.assets_installation_date_dict[current_asset_id]
                 current_asset_commissioning_date = self.assets_commissioning_date_dict[current_asset_id]
                 current_asset_valid_start_date = current_asset_commissioning_date + datetime.timedelta(days=self.commissioningDatePlusDays) 
+                current_asset_nominal_wattage = self.assets_nominal_wattage_dict[current_asset_id]
                 current_date = row_time.date()
                 current_date_day_start_time = datetime.datetime.combine(current_date, self.daytime_start_time)
                 current_date_day_end_time = datetime.datetime.combine(current_date, self.daytime_end_time)  
@@ -247,7 +248,7 @@ class EnergyConsumption:
                 consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
                 #print(row)
                 #print(energyConsumed, consumptionRate, secondsInterval)
-                if consumptionRate > nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold:
+                if consumptionRate > current_asset_nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold:
                     totalOnTime += secondsInterval
                     totalEnergyConsumed += energyConsumed
                     num_interval_positive += 1

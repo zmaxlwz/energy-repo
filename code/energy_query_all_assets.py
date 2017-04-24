@@ -32,7 +32,7 @@ class EnergyConsumption:
         #assets nominal wattage dict
         self.assets_nominal_wattage_dict = {}
 
-    def connectDB(self):
+    def connect_db(self):
         """ build connection to the database
 
         """    
@@ -48,7 +48,7 @@ class EnergyConsumption:
         #define cursor
         self.cur = self.conn.cursor()  
 
-    def getConfig(self, configFilename):
+    def get_config(self, configFilename):
         """ get configuration parameters
 
         """    
@@ -92,9 +92,9 @@ class EnergyConsumption:
 
         """
         #step 1:  read from json config file, get db connect parameter, time period to check, output file name
-        self.getConfig(self.configFilename)
+        self.get_config(self.configFilename)
         #step 2:  connect to db
-        self.connectDB()
+        self.connect_db()
         #step 3:  compute sunrise and sunset time 
         #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 4:  get assets list
@@ -184,7 +184,6 @@ class EnergyConsumption:
 
         rows = self.cur.fetchmany(50000)
         while rows:
-
             #process each record in order 
             for row in rows:   
                 row_asset_id = row[0]

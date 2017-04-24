@@ -1,5 +1,5 @@
 {
-        "pg_dbname": "jakarta_utara",
+        "pg_dbname": "jakarta_pusat",
         "pg_username": "awsmaster",
         "pg_password": "philips2017",
         "pg_host": "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com",

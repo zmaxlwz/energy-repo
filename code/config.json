@@ -10,7 +10,7 @@
         "period_start_date": "1/1/2017",
         "period_end_date": "1/31/2017",
         "commissioning_date_plus_days": "3",
-        "nominal_wattage_ratio": "0.1",
+        "nominal_wattage_ratio": "0",
         "daytime_start_time": "0:30:0",
         "daytime_end_time": "9:30:0",
         "sunrise_time_delta_hours": "0",

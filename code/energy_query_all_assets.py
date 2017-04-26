@@ -20,6 +20,11 @@ class EnergyConsumption:
         self.sunriseTimeDict = {}
         #sunset dict
         self.sunsetTimeDict = {}
+        
+        #average sunrise time in Jakarta in UTC
+        self.sunrise_time_avg_utc = datetime.time(22, 55, 8) 
+        #average sunset time in Jakarta in UTC
+        self.sunset_time_avg_utc = datetime.time(11, 4, 16)
 
         #assets latitude dict
         self.assets_latitude_dict = {}
@@ -31,6 +36,8 @@ class EnergyConsumption:
         self.assets_commissioning_date_dict = {}
         #assets nominal wattage dict
         self.assets_nominal_wattage_dict = {}
+        #assets luminaire type
+        self.assets_luminaire_type_dict = {}
         #assets street name dict
         self.assets_street_name_dict = {}
 
@@ -147,7 +154,7 @@ class EnergyConsumption:
 
         """        
         try:
-            self.cur.execute("select a.id, lt.nominal_wattage, lt.actual_wattage \
+            self.cur.execute("select a.id, lt.type_designation, lt.nominal_wattage, lt.actual_wattage \
                               from luminaire_types lt, luminaires l, components c, assets a \
                               where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
                               and a.id = c.asset_id and c.id = l.id and l.luminaire_type_id = lt.id \
@@ -159,7 +166,9 @@ class EnergyConsumption:
 
         for row in rows:
             asset_id = row[0]
-            nominal_wattage = row[1]
+            luminaire_type = row[1]
+            nominal_wattage = row[2]            
+            self.assets_luminaire_type_dict[asset_id] = luminaire_type
             self.assets_nominal_wattage_dict[asset_id] = nominal_wattage
 
     def compute_energy_consumption(self):
@@ -203,7 +212,7 @@ class EnergyConsumption:
                             totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
                         if totalOnTime > self.onTimeThreshold:
                             #print(date, id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
-                            results.append((current_date, current_asset_id, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+                            results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_in_daytime, last_time_stamp_in_daytime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                     current_asset_id = row_asset_id 
                     count += 1
                     print(count)
@@ -214,12 +223,15 @@ class EnergyConsumption:
                     current_asset_valid_start_date = current_asset_commissioning_date + datetime.timedelta(days=self.commissioningDatePlusDays) 
                     current_asset_nominal_wattage = self.assets_nominal_wattage_dict[current_asset_id]
                     current_asset_street_name = self.assets_street_name_dict[current_asset_id]
+                    current_asset_region_name = self.pg_dbname
+                    current_asset_luminaire_type = self.assets_luminaire_type_dict[current_asset_id]
                     current_date = row_time.date()
                     current_date_day_start_time = datetime.datetime.combine(current_date, self.daytime_start_time)
                     current_date_day_end_time = datetime.datetime.combine(current_date, self.daytime_end_time)  
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                     num_interval, num_interval_positive = 0, 0
                     lastEnergy, lastTime = None, None
+                    first_time_stamp_in_daytime, last_time_stamp_in_daytime = None, None
                 if row_time.date() < current_asset_valid_start_date:    
                     #this date is before valid start date for this asset (commissioning_date + 3 days for instance)
                     continue
@@ -234,7 +246,7 @@ class EnergyConsumption:
                         totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
                     if totalOnTime > self.onTimeThreshold:
                         #print(date, id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
-                        results.append((current_date, current_asset_id, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+                        results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_in_daytime, last_time_stamp_in_daytime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                     #start a new date                
                     current_date = row_time.date()
                     current_date_day_start_time = datetime.datetime.combine(current_date, self.daytime_start_time)
@@ -242,15 +254,19 @@ class EnergyConsumption:
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                     num_interval, num_interval_positive = 0, 0
                     lastEnergy, lastTime = None, None
+                    first_time_stamp_in_daytime, last_time_stamp_in_daytime = None, None
                 if row_time < current_date_day_start_time or row_time > current_date_day_end_time:
                     #it is not in the day time
                     continue    
                 if lastTime is None:
                     lastEnergy = row_energy
                     lastTime = row_time
+                    first_time_stamp_in_daytime = row_time
+                    last_time_stamp_in_daytime = row_time
                 else:
                     currentEnergy = row_energy
                     currentTime = row_time
+                    last_time_stamp_in_daytime = row_time
                     secondsInterval = (currentTime - lastTime).total_seconds()
                     energyConsumed = currentEnergy - lastEnergy
                     lastEnergy = currentEnergy
@@ -278,7 +294,7 @@ class EnergyConsumption:
             totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
         if totalOnTime > self.onTimeThreshold:
             #print(date, id, lat, long, installation_date, commissioning_date, onTime, energyConsumedKwh, energyConsumedWatts)
-            results.append((current_date, current_asset_id, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+            results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_in_daytime, last_time_stamp_in_daytime, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
         
         return results          
 

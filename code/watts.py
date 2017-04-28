@@ -80,7 +80,7 @@ class ComputeWatts:
         #step 3:  get assets list
         #assets = self.getAssetsList()
         #assets = [(2490, -6.113218, 106.778701)]
-        assets = [(3776, -6.118187, 106.894265)]
+        assets = [(14182, -6.118187, 106.894265)]
         #step 4:  call computeResults method
         self.computeResults(assets)
         

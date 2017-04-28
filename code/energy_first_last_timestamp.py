@@ -22,9 +22,11 @@ class EnergyConsumption:
         self.sunsetTimeDict = {}
         
         #average sunrise time in Jakarta in UTC
-        self.sunrise_time_avg_utc = datetime.time(22, 55, 8) 
+        #self.sunrise_time_avg_utc = datetime.time(22, 55, 8) 
+        self.sunrise_time_avg_utc = datetime.time(23, 0, 0)
         #average sunset time in Jakarta in UTC
-        self.sunset_time_avg_utc = datetime.time(11, 4, 16)
+        #self.sunset_time_avg_utc = datetime.time(11, 4, 16)
+        self.sunset_time_avg_utc = datetime.time(11, 0, 0)
 
         #assets latitude dict
         self.assets_latitude_dict = {}

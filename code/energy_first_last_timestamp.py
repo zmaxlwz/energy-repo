@@ -319,6 +319,7 @@ class EnergyConsumption:
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
             title_row = ('region', 'date', 'asset_id', 'luminaire_type', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'nominal_wattage', 'street_name', 'timespan', 'first_timestamp', 'last_timestamp', 'energyConsumedKwh', 'energyConsumedWatts', 'numIntervals', 'numPositiveIntervals')         
+            csvWriter.writerow(title_row)
             for record in results:
                 csvWriter.writerow(record)
 

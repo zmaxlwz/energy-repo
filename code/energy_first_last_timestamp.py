@@ -234,7 +234,8 @@ class EnergyConsumption:
                     current_date_day_end_time = datetime.datetime.combine(current_date, self.daytime_end_time)  
                     '''
                     next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
-                    next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                    #next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                    next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                     next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
                     next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
@@ -289,7 +290,8 @@ class EnergyConsumption:
                     results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                 
                 next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
-                next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                #next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                 next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
                 next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
                 totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0

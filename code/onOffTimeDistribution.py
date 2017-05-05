@@ -76,7 +76,7 @@ class ComputeDistribution:
         #step 2:  connect to db
         self.connectDB()
         #step 3:  compute sunrise and sunset time 
-        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
+        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get components list
         #component_id_list = [4980]
         component_id_list = self.getComponentsList()
@@ -155,22 +155,22 @@ class ComputeDistribution:
                 count += 1
                 print(count)
                 #results = self.computeTimeDiff(component_id)
-                #results = self.computeTurnOnTime(component_id)
-                results = self.computeTurnOffTime(component_id)
+                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOffTime(component_id)
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
     
     def computeTurnOnTime(self, component_id):
         """ using switching point table, compute the switching point turn-on time in minutes from day start
-            because most turn-on time appear between 9 - 10 am UTC, I constrain the range to be [6:00 - 13:00] UTC
+            this is for Barcelona dataset
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
         timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
 
         try:
-            self.cur.execute("select component_id, timestamp_utc, log_value \
+            self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
                               from switching_points \
                               where component_id = %s \
                               and timestamp_utc > %s and timestamp_utc < %s  \
@@ -183,36 +183,43 @@ class ComputeDistribution:
             return []
 
         results = []
-        lastLogValue, lastTime = None, None    
+        lastLogValue, lastIsLogValueOff, lastTime = None, None, None    
         for row in rows:   
             if lastTime is None:                
                 lastTime = row[1]
                 lastLogValue = row[2]
+                lastIsLogValueOff = row[3]
             else:                
                 currentTime = row[1]
                 currentLogValue = row[2]
-                               
+                currentIsLogValueOff = row[3]
+                '''               
                 if currentLogValue == 100 and lastLogValue == 0:
                     #turn on light
                     if currentTime.time() > datetime.time(6) and currentTime.time() < datetime.time(13):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)
-                    
+                '''
+                if currentIsLogValueOff == 'f' and lastIsLogValueOff == 't':
+                    #turn on light
+                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                    results.append(minutesFromDayStart)    
                 lastLogValue = currentLogValue
+                lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
         
         return results    
 
     def computeTurnOffTime(self, component_id):   
         """ using switching point table, compute the switching point turn-off time in minutes from day start
-            because most turn-off time appear between 10 - 12 pm UTC, I constrain the range to be [19:00 - 24:00] & [0:00 - 3:00] UTC
+            this is for Barcelona dataset
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
         timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
 
         try:
-            self.cur.execute("select component_id, timestamp_utc, log_value \
+            self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
                               from switching_points \
                               where component_id = %s \
                               and timestamp_utc > %s and timestamp_utc < %s  \
@@ -225,15 +232,17 @@ class ComputeDistribution:
             return []
 
         results = []
-        lastLogValue, lastTime = None, None    
+        lastLogValue, lastIsLogValueOff, lastTime = None, None, None    
         for row in rows:   
             if lastTime is None:                
                 lastTime = row[1]
                 lastLogValue = row[2]
+                lastIsLogValueOff = row[3]
             else:                
                 currentTime = row[1]
                 currentLogValue = row[2]
-                               
+                currentIsLogValueOff = row[3]
+                '''               
                 if currentLogValue == 0 and lastLogValue == 100:
                     #turn off light
                     if (currentTime.time() > datetime.time(19) and currentTime.time() <= datetime.time(23, 59, 59)):
@@ -242,52 +251,16 @@ class ComputeDistribution:
                     elif (currentTime.time() > datetime.time(0) and currentTime.time() < datetime.time(3)):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)    
-                    
+                '''
+                if currentIsLogValueOff == 't' and lastIsLogValueOff == 'f':
+                    #turn off light
+                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                    results.append(minutesFromDayStart)     
                 lastLogValue = currentLogValue
+                lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
         
         return results    
-
-    def computeTimeDiff(self, component_id):
-        
-        timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
-        timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
-
-        try:
-            self.cur.execute("select component_id, timestamp_utc, log_value \
-                              from switching_points \
-                              where component_id = %s \
-                              and timestamp_utc > %s and timestamp_utc < %s  \
-                              order by timestamp_utc;", (component_id, timeStart, timeEnd))
-        except:
-            print("I am unable to get data")
-
-        rows = self.cur.fetchall() 
-        if len(rows) == 0:
-            return []
-
-        results = []
-        lastLogValue, lastTime = None, None    
-        for row in rows:   
-            if lastTime is None:                
-                lastTime = row[1]
-                lastLogValue = row[2]
-            else:                
-                currentTime = row[1]
-                currentLogValue = row[2]
-                               
-                if currentLogValue == 100 and lastLogValue == 0:
-                    #turn on light
-                    sunsetTime = self.sunsetTimeDict[currentTime.date()]
-                    secondsInterval = (sunsetTime - currentTime).total_seconds()
-                    #print(sunsetTime, currentTime, secondsInterval)
-                    results.append(secondsInterval)
-
-                lastLogValue = currentLogValue
-                lastTime = currentTime 
-        
-        return results    
-
 
 if __name__ == "__main__":
 

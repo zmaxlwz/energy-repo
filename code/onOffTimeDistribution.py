@@ -157,9 +157,11 @@ class ComputeDistribution:
                 #results = self.computeTimeDiff(component_id)
                 results = self.computeTurnOnTime(component_id)
                 #results = self.computeTurnOffTime(component_id)
+                print('len of results: ', len(results))
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
+                break
     
     def computeTurnOnTime(self, component_id):
         """ using switching point table, compute the switching point turn-on time in minutes from day start
@@ -200,6 +202,7 @@ class ComputeDistribution:
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)
                 '''
+                print(currentIsLogValueOff, lastIsLogValueOff)
                 if currentIsLogValueOff == 'f' and lastIsLogValueOff == 't':
                     #turn on light
                     minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0

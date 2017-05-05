@@ -157,13 +157,11 @@ class ComputeDistribution:
                 #results = self.computeTimeDiff(component_id)
                 results = self.computeTurnOnTime(component_id)
                 #results = self.computeTurnOffTime(component_id)
-                print('len of results: ', len(results))
+                #print('len of results: ', len(results))
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
-                if count > 5:
-                    break
-    
+                
     def computeTurnOnTime(self, component_id):
         """ using switching point table, compute the switching point turn-on time in minutes from day start
             this is for Barcelona dataset
@@ -203,8 +201,8 @@ class ComputeDistribution:
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)
                 '''
-                print(currentIsLogValueOff, lastIsLogValueOff)
-                if currentIsLogValueOff == 'f' and lastIsLogValueOff == 't':
+                #print(currentIsLogValueOff, lastIsLogValueOff)
+                if currentIsLogValueOff == False and lastIsLogValueOff == True:
                     #turn on light
                     minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                     results.append(minutesFromDayStart)    
@@ -256,7 +254,7 @@ class ComputeDistribution:
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append(minutesFromDayStart)    
                 '''
-                if currentIsLogValueOff == 't' and lastIsLogValueOff == 'f':
+                if currentIsLogValueOff == True and lastIsLogValueOff == False:
                     #turn off light
                     minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                     results.append(minutesFromDayStart)     

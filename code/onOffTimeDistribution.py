@@ -155,8 +155,8 @@ class ComputeDistribution:
                 count += 1
                 print(count)
                 #results = self.computeTimeDiff(component_id)
-                #results = self.computeTurnOnTime(component_id)
-                results = self.computeTurnOffTime(component_id)
+                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 if len(results) > 0:
                     csvWriter.writerow(results)

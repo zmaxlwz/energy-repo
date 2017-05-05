@@ -161,7 +161,8 @@ class ComputeDistribution:
                 if len(results) > 0:
                     csvWriter.writerow(results)
                 #self.plot(results)
-                break
+                if count > 5:
+                    break
     
     def computeTurnOnTime(self, component_id):
         """ using switching point table, compute the switching point turn-on time in minutes from day start

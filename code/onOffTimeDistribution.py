@@ -164,7 +164,7 @@ class ComputeDistribution:
                 
     def computeTurnOnTime(self, component_id):
         """ using switching point table, compute the switching point turn-on time in minutes from day start
-            this is for Barcelona dataset
+            this is for Barcelona dataset, turn-on time range is [14:00 - 22:00]
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
@@ -204,8 +204,9 @@ class ComputeDistribution:
                 #print(currentIsLogValueOff, lastIsLogValueOff)
                 if currentIsLogValueOff == False and lastIsLogValueOff == True:
                     #turn on light
-                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                    results.append(minutesFromDayStart)    
+                    if currentTime.time() > datetime.time(14) and currentTime.time() < datetime.time(22):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                        results.append(minutesFromDayStart)    
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
@@ -214,7 +215,7 @@ class ComputeDistribution:
 
     def computeTurnOffTime(self, component_id):   
         """ using switching point table, compute the switching point turn-off time in minutes from day start
-            this is for Barcelona dataset
+            this is for Barcelona dataset, off time range is [2 - 10am]
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
@@ -256,8 +257,9 @@ class ComputeDistribution:
                 '''
                 if currentIsLogValueOff == True and lastIsLogValueOff == False:
                     #turn off light
-                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                    results.append(minutesFromDayStart)     
+                    if currentTime.time() > datetime.time(2) and currentTime.time() < datetime.time(10):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                        results.append(minutesFromDayStart)     
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 

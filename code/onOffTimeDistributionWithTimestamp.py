@@ -150,15 +150,20 @@ class ComputeDistribution:
         #print(assets)
         count = 0
         with open(self.outputFilename, "w") as csvFile:
-            csvWriter = csv.writer(csvFile, delimiter=',')        
+            csvWriter = csv.writer(csvFile, delimiter=',')  
+            title_row = ('component_id', 'timestamp', 'time_in_minutes_from_daystart')
+            csvWriter.writerow(title_row)     
             for component_id in component_id_list:
                 count += 1
                 print(count)
                 results = self.computeTurnOnTime(component_id)
                 #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
+                #the results returned is a list of tuples
                 if len(results) > 0:
-                    csvWriter.writerow(results)
+                    for record in results:
+                        #csvWriter.writerow(results)
+                        csvWriter.writerow(record)
                 #self.plot(results)
                 
     def computeTurnOnTime(self, component_id):
@@ -185,7 +190,7 @@ class ComputeDistribution:
         results = []
         lastLogValue, lastIsLogValueOff, lastTime = None, None, None    
         for row in rows:   
-            if lastTime is None:                
+            if lastTime is None:               
                 lastTime = row[1]
                 lastLogValue = row[2]
                 lastIsLogValueOff = row[3]
@@ -205,7 +210,7 @@ class ComputeDistribution:
                     #turn on light
                     if currentTime.time() > datetime.time(14) and currentTime.time() < datetime.time(22):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append(minutesFromDayStart)    
+                        results.append((component_id, currentTime, minutesFromDayStart))    
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
@@ -258,7 +263,7 @@ class ComputeDistribution:
                     #turn off light
                     if currentTime.time() > datetime.time(2) and currentTime.time() < datetime.time(10):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append(minutesFromDayStart)     
+                        results.append((component_id, currentTime, minutesFromDayStart))     
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
@@ -269,5 +274,4 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = ComputeDistribution(configJSONFilename)    
-    testObj.run()
-            
+    testObj.run()            

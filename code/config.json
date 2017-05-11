@@ -6,7 +6,7 @@
         "pg_port": "5432",
         "output_csvfile_name": "result22.csv",
         "energy_threshold": "5",
-        "onTime_threshold": "0",
+        "onTime_threshold": "1800",
         "period_start_date": "1/1/2017",
         "period_end_date": "1/31/2017",
         "commissioning_date_plus_days": "3",

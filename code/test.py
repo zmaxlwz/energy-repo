@@ -6,7 +6,7 @@ import csv
 import sys
 import json
 
-class TestMeterReading(Object):
+class TestMeterReading(object):
 
     def __init__(self):
         """ initialization

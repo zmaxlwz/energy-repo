@@ -9,12 +9,12 @@ import json
 class TestMeterReading(Object):
 
     def __init__(self):
-    	""" initialization
+        """ initialization
          
-    	"""
-    	startDate = "5/1/2016"
-    	endDate = "6/1/2016"
-    	#period start date
+        """
+        startDate = "5/1/2016"
+        endDate = "6/1/2016"
+        #period start date
         self.startDate = datetime.datetime.strptime(startDate, '%m/%d/%Y').date()
         #period end date
         self.endDate = datetime.datetime.strptime(endDate, '%m/%d/%Y').date()
@@ -53,7 +53,7 @@ class TestMeterReading(Object):
         except:
             print("I am unable to get data")
 
-        return self.cur.fetchall()    	
+        return self.cur.fetchall()    
 
     def computeResult(self):
         """
@@ -75,7 +75,7 @@ class TestMeterReading(Object):
                               order by b.asset_id, a.timestamp_utc"
 
         try:
-        	print(self.cur.mogrify(query, (assets_id_list, first_date_time, last_date_time)))
+            print(self.cur.mogrify(query, (assets_id_list, first_date_time, last_date_time)))
             self.cur.execute(query, (assets_id_list, first_date_time, last_date_time))
         except:
             print("I am unable to get data")
@@ -89,11 +89,11 @@ class TestMeterReading(Object):
         print("success") 
 
     def run(self):
-    	""" run the program
+        """ run the program
 
-    	"""
-    	self.connectDB()
-    	self.computeResult()
+        """
+        self.connectDB()
+        self.computeResult()
 
 if __name__ == "__main__":
 

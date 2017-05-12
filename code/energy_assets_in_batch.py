@@ -129,7 +129,10 @@ class EnergyConsumption:
         end_index = start_index + step
         assets_id_sublist = assets_id_list[start_index:end_index]
         results = []
+        count = 0
         while not assets_id_sublist:
+            count += 1
+            print(count)
             results += self.compute_energy_consumption(assets_id_sublist)
             start_index += step
             end_index += step
@@ -257,7 +260,7 @@ class EnergyConsumption:
                 
                     current_asset_id = row_asset_id 
                     count += 1
-                    print(count)
+                    #print(count)
                     current_asset_latitude = self.assets_latitude_dict[current_asset_id]
                     current_asset_longitude = self.assets_longitude_dict[current_asset_id]
                     current_asset_installation_date = self.assets_installation_date_dict[current_asset_id]

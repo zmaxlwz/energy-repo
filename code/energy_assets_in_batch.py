@@ -224,7 +224,7 @@ class EnergyConsumption:
 
         assets_id_tuple = tuple(assets_id_list)
 
-        print("before query for kwh data")
+        #print("before query for kwh data")
 
         try:
             self.cur.execute("select b.asset_id , a.kwh, a.timestamp_utc \
@@ -235,7 +235,7 @@ class EnergyConsumption:
         except:
             print("I am unable to get data")
 
-        print("finished query for kwh data")    
+        #print("finished query for kwh data")    
 
         current_asset_id = None
         count = 0

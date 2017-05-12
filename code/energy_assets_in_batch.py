@@ -117,7 +117,6 @@ class EnergyConsumption:
         #assets = [(3776, -6.118187, 106.894265, datetime.date(2016, 5, 27), datetime.date(2016, 6, 1))]
         #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
         assets_id_list = self.getAssetsList()
-        print(len(assets_id_list))
         #step 5:  call computeResults method
         #self.computeResults(assets)
         self.get_assets_info()
@@ -131,7 +130,7 @@ class EnergyConsumption:
         assets_id_sublist = assets_id_list[start_index:end_index]
         results = []
         count = 0
-        while not assets_id_sublist:
+        while assets_id_sublist:
             count += 1
             print(count)
             results += self.compute_energy_consumption(assets_id_sublist)

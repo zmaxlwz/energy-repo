@@ -155,9 +155,12 @@ class ComputeDistribution:
             csvWriter.writerow(title_row)     
             for component_id in component_id_list:
                 count += 1
+                #only compute for first 500 components
+                if count > 500:
+                    break
                 print(count)
-                #results = self.computeTurnOnTime(component_id)
-                results = self.computeTurnOffTime(component_id)
+                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 if len(results) > 0:
@@ -208,7 +211,7 @@ class ComputeDistribution:
                 #print(currentIsLogValueOff, lastIsLogValueOff)
                 if currentIsLogValueOff == False and lastIsLogValueOff == True:
                     #turn on light
-                    if currentTime.time() > datetime.time(14) and currentTime.time() < datetime.time(22):
+                    if currentTime.time() > datetime.time(20, 0, 0) and currentTime.time() < datetime.time(23, 59, 59):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append((component_id, currentTime, minutesFromDayStart))    
                 lastLogValue = currentLogValue
@@ -261,7 +264,7 @@ class ComputeDistribution:
                 '''
                 if currentIsLogValueOff == True and lastIsLogValueOff == False:
                     #turn off light
-                    if currentTime.time() > datetime.time(2) and currentTime.time() < datetime.time(10):
+                    if currentTime.time() > datetime.time(8, 0, 0) and currentTime.time() < datetime.time(12, 0, 0):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append((component_id, currentTime, minutesFromDayStart))     
                 lastLogValue = currentLogValue

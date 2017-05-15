@@ -203,9 +203,9 @@ class ComputeDistribution:
                 #print(currentIsLogValueOff, lastIsLogValueOff)
                 if currentIsLogValueOff == False and lastIsLogValueOff == True:
                     #turn on light
-                    if currentTime.time() > datetime.time(14) and currentTime.time() < datetime.time(22):
-                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append(minutesFromDayStart)    
+                    #if currentTime.time() > datetime.time(14) and currentTime.time() < datetime.time(22):
+                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                    results.append(minutesFromDayStart)    
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 
@@ -256,9 +256,9 @@ class ComputeDistribution:
                 '''
                 if currentIsLogValueOff == True and lastIsLogValueOff == False:
                     #turn off light
-                    if currentTime.time() > datetime.time(2) and currentTime.time() < datetime.time(10):
-                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append(minutesFromDayStart)     
+                    #if currentTime.time() > datetime.time(2) and currentTime.time() < datetime.time(10):
+                    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                    results.append(minutesFromDayStart)     
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 

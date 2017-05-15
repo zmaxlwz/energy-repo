@@ -153,11 +153,11 @@ class ComputeDistribution:
             csvWriter = csv.writer(csvFile, delimiter=',')        
             for component_id in component_id_list:
                 count += 1
-                if count > 681:
+                if count > 491:
                     break
                 print(count)
-                results = self.computeTurnOnTime(component_id)
-                #results = self.computeTurnOffTime(component_id)
+                #results = self.computeTurnOnTime(component_id)
+                results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 if len(results) > 0:
                     csvWriter.writerow(results)

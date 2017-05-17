@@ -74,8 +74,8 @@ class GeoCoding:
         count = 0
         for row in assets_list:
             count += 1            
-            if count > 4:
-                break
+            #if count > 4:
+            #    break
             print(count)    
             asset_id = row[0]
             asset_latitude = row[1]

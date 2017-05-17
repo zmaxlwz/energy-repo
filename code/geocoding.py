@@ -70,20 +70,7 @@ class GeoCoding:
         """ perform reverse geocoding for each asset, each item is a tuple including asset_id, asset_latitude and asset_longitude
 
         """
-
-        count = 5
-        asset_id = 1111
-        street_name = None
-        city_name = None
-        country_name = None
-        try:
-                self.cur.execute("insert into streets_reverse_geocoded \
-                                  (id, asset_id, route, administrative_area_level_2, country) \
-                                  values (%s, %s, %s, %s, %s)", (count, asset_id, street_name, city_name, country_name))
-        except:
-                print("I am unable to get data")
-
-        '''
+        
         count = 0
         for row in assets_list:
             count += 1            
@@ -140,9 +127,7 @@ class GeoCoding:
             except:
                 print("I am unable to get data")
 
-        '''        
-
-        self.conn.commit()        
+            self.conn.commit()        
 
 
     def run(self):

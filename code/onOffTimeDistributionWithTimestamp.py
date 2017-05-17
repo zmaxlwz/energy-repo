@@ -159,8 +159,8 @@ class ComputeDistribution:
                 if count > 500:
                     break
                 print(count)
-                #results = self.computeTurnOnTime(component_id)
-                results = self.computeTurnOffTime(component_id)
+                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 if len(results) > 0:

@@ -5,15 +5,15 @@ import csv
 import json
 
 class GeoCoding:
-	def __init__(self, key):
-		""" initialize variables
+    def __init__(self, key):
+        """ initialize variables
 
-		"""
-		self.key = key
-		self.client = gmaps.Client(key = self.key)
-		#self.table_name = 'streets_reverse_geocoded'
+        """
+        self.key = key
+        self.client = gmaps.Client(key = self.key)
+        #self.table_name = 'streets_reverse_geocoded'
 
-		self.pg_dbname = "los_angeles"
+        self.pg_dbname = "los_angeles"
         self.pg_username = "awsmaster"
         self.pg_password = "philips2017"
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"
@@ -65,10 +65,10 @@ class GeoCoding:
         """
         count = 0
         for row in assets_list:
-        	count += 1
-        	print(count)
-        	if count > 4:
-        		break
+            count += 1
+            print(count)
+            if count > 4:
+                break
             asset_id = row[0]
             asset_latitude = row[1]
             asset_longitude = row[2]
@@ -114,8 +114,8 @@ class GeoCoding:
 
             try:
                 self.cur.execute("insert into streets_reverse_geocoded \
-                	              (id, asset_id, route, administrative_area_level_2, country) \
-                	              values (%s, %s, %s, %s, %s)", (count, asset_id, street_name, city_name, country_name))
+                                  (id, asset_id, route, administrative_area_level_2, country) \
+                                  values (%s, %s, %s, %s, %s)", (count, asset_id, street_name, city_name, country_name))
             except:
                 print("I am unable to get data")
 
@@ -129,7 +129,7 @@ class GeoCoding:
         self.reverseGeocoding(assets_list)
 
 if __name__ == "__main__":
-	geocodingObj = GeoCoding()
-	geocodingObj.run()
+    geocodingObj = GeoCoding()
+    geocodingObj.run()
 
-	
+

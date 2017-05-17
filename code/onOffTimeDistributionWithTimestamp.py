@@ -159,8 +159,8 @@ class ComputeDistribution:
                 #if count > 500:
                 #    break
                 print(count)
-                #results = self.computeTurnOnTime(component_id)
-                results = self.computeTurnOffTime(component_id)
+                results = self.computeTurnOnTime(component_id)
+                #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 if len(results) > 0:
@@ -211,7 +211,8 @@ class ComputeDistribution:
                 #print(currentIsLogValueOff, lastIsLogValueOff)
                 if currentIsLogValueOff == False and lastIsLogValueOff == True:
                     #turn on light
-                    if currentTime.time() > datetime.time(20, 0, 0) and currentTime.time() < datetime.time(23, 59, 59):
+                    #if currentTime.time() > datetime.time(20, 0, 0) and currentTime.time() < datetime.time(23, 59, 59):
+                    if currentTime.time() > datetime.time(8) and currentTime.time() < datetime.time(13):    
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
                         results.append((component_id, currentTime, minutesFromDayStart))    
                 lastLogValue = currentLogValue
@@ -264,9 +265,15 @@ class ComputeDistribution:
                 '''
                 if currentIsLogValueOff == True and lastIsLogValueOff == False:
                     #turn off light
-                    if currentTime.time() > datetime.time(8, 0, 0) and currentTime.time() < datetime.time(12, 0, 0):
+                    #if currentTime.time() > datetime.time(8, 0, 0) and currentTime.time() < datetime.time(12, 0, 0):
+                    #    minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
+                    #    results.append((component_id, currentTime, minutesFromDayStart))     
+                    if (currentTime.time() > datetime.time(20) and currentTime.time() <= datetime.time(23, 59, 59)):
+                        minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date() + datetime.timedelta(days=1), datetime.time())).total_seconds() / 60.0
+                        results.append((component_id, currentTime, minutesFromDayStart)) 
+                    elif (currentTime.time() > datetime.time(0) and currentTime.time() < datetime.time(2)):
                         minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append((component_id, currentTime, minutesFromDayStart))     
+                        results.append((component_id, currentTime, minutesFromDayStart))   
                 lastLogValue = currentLogValue
                 lastIsLogValueOff = currentIsLogValueOff
                 lastTime = currentTime 

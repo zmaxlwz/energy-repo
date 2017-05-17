@@ -76,7 +76,7 @@ class GeoCoding:
             count += 1            
             #if count > 4:
             #    break
-            if count <= 9923:
+            if count <= 9926:
                 continue
             print(count)    
             asset_id = row[0]

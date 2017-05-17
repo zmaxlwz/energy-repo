@@ -156,8 +156,8 @@ class ComputeDistribution:
             for component_id in component_id_list:
                 count += 1
                 #only compute for first 500 components
-                if count > 500:
-                    break
+                #if count > 500:
+                #    break
                 print(count)
                 results = self.computeTurnOnTime(component_id)
                 #results = self.computeTurnOffTime(component_id)

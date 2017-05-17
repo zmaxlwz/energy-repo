@@ -76,10 +76,13 @@ class GeoCoding:
             count += 1            
             #if count > 4:
             #    break
+            if count <= 9923:
+                continue
             print(count)    
             asset_id = row[0]
             asset_latitude = row[1]
             asset_longitude = row[2]
+            print(asset_id, asset_latitude, asset_longitude)
             reverse_addr = self.client.reverse_geocode((float(asset_latitude), float(asset_longitude)))
             try:
                 #the returned address is not empty                             

@@ -35,6 +35,13 @@ class GeoCoding:
         #define cursor
         self.cur = self.conn.cursor() 
 
+    def disconnect_db(self):
+        """ close db connection
+
+        """    
+        self.cur.close()
+        self.conn.close()
+
     def getAssetsList(self):
         """ get assets list from assets table, 
             for LA, we are interested in the assets that are not deleted and commissioning_date are not null
@@ -65,10 +72,10 @@ class GeoCoding:
         """
         count = 0
         for row in assets_list:
-            count += 1
-            print(count)
+            count += 1            
             if count > 4:
                 break
+            print(count)    
             asset_id = row[0]
             asset_latitude = row[1]
             asset_longitude = row[2]
@@ -119,6 +126,8 @@ class GeoCoding:
             except:
                 print("I am unable to get data")
 
+        self.conn.commit()        
+
 
     def run(self):
         """ 
@@ -127,6 +136,7 @@ class GeoCoding:
         self.connect_db()
         assets_list = self.getAssetsList()
         self.reverseGeocoding(assets_list)
+        self.disconnect_db()
 
 if __name__ == "__main__":
 

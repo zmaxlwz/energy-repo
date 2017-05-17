@@ -129,7 +129,11 @@ class GeoCoding:
         self.reverseGeocoding(assets_list)
 
 if __name__ == "__main__":
-    geocodingObj = GeoCoding()
+
+    #geocoding paid key
+    key = 'AIzaSyAuXEEdlYPKW-KYrDupd04_stQQeDlIrIo'
+
+    geocodingObj = GeoCoding(key)
     geocodingObj.run()
 
 

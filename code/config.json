@@ -1,5 +1,5 @@
 {
-        "pg_dbname": "jakarta_utara",
+        "pg_dbname": "los_angeles",
         "pg_username": "awsmaster",
         "pg_password": "philips2017",
         "pg_host": "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com",
@@ -11,8 +11,8 @@
         "period_end_date": "1/31/2017",
         "commissioning_date_plus_days": "3",
         "nominal_wattage_ratio": "0.1",
-        "daytime_start_time": "23:0:0",
-        "daytime_end_time": "11:0:0",
+        "daytime_start_time": "16:0:0",
+        "daytime_end_time": "23:59:59",
         "sunrise_time_delta_hours": "0",
         "sunrise_time_delta_minutes": "30",
         "sunrise_time_delta_seconds": "0",

@@ -25,13 +25,17 @@ class EnergyConsumption:
         #self.sunrise_time_avg_utc = datetime.time(22, 55, 8) 
         #self.sunrise_time_avg_utc = datetime.time(23, 0, 0)
         #average sunrise time in CABA in UTC in 2016-5
-        self.sunrise_time_avg_utc = datetime.time(10, 40, 0)
+        #self.sunrise_time_avg_utc = datetime.time(10, 40, 0)
+        #average sunrise time in LA in UTC in 2017-1
+        self.sunrise_time_avg_utc = datetime.time(15, 0, 0)        
         #average sunset time in Jakarta in UTC
         #self.sunset_time_avg_utc = datetime.time(11, 4, 16)
         #self.sunset_time_avg_utc = datetime.time(11, 0, 0)
         #average sunset time in CABA in UTC in 2016-5
-        self.sunset_time_avg_utc = datetime.time(21, 0, 0)
-
+        #self.sunset_time_avg_utc = datetime.time(21, 0, 0)
+        #average sunset time in LA in UTC in 2017-1
+        self.sunset_time_avg_utc = datetime.time(1, 0, 0)
+        
         #assets latitude dict
         self.assets_latitude_dict = {}
         #assets longitude dict
@@ -148,10 +152,18 @@ class EnergyConsumption:
 
         """                
         try:
+            '''
             self.cur.execute("select id \
                               from assets \
                               where is_deleted = 'f' \
                               and installation_date is not null and commissioning_date is not null")
+            '''
+            #for LA
+            self.cur.execute("select id \
+                              from assets \
+                              where is_deleted = 'f' \
+                              and commissioning_date is not null")
+
         except:
             print("I am unable to get data")
 
@@ -169,11 +181,19 @@ class EnergyConsumption:
 
         """
         try:
+            '''
             self.cur.execute("select a.id, a.latitude, a.longitude, a.installation_date, a.commissioning_date, s.name as street_name \
                               from assets as a, streets as s \
                               where a.is_deleted = 'f' \
                               and a.installation_date is not null and a.commissioning_date is not null \
                               and a.street_id = s.id")
+            '''
+            #for LA
+            self.cur.execute("select a.id, a.latitude, a.longitude, a.installation_date, a.commissioning_date, s.name as street_name \
+                              from assets as a, streets as s \
+                              where a.is_deleted = 'f' \
+                              and a.commissioning_date is not null \
+                              and a.street_id = s.id")                  
         except:
             print("I am unable to get data")
 
@@ -197,11 +217,20 @@ class EnergyConsumption:
 
         """        
         try:
+            '''
             self.cur.execute("select a.id, lt.type_designation, lt.nominal_wattage, lt.actual_wattage \
                               from luminaire_types lt, luminaires l, components c, assets a \
                               where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
                               and a.id = c.asset_id and c.id = l.id and l.luminaire_type_id = lt.id \
                               order by a.id")
+            '''
+            #for LA, nominal_wattage is null, use actual wattage, 
+            self.cur.execute("select a.id, lt.type_designation, lt.actual_wattage \
+                              from luminaire_types lt, luminaires l, components c, assets a \
+                              where a.is_deleted = 'f' and a.commissioning_date is not null \
+                              and a.id = c.asset_id and c.id = l.id and l.luminaire_type_id = lt.id \
+                              order by a.id")                  
+
         except:
             print("I am unable to get data")
 
@@ -280,7 +309,8 @@ class EnergyConsumption:
                     next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                     #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                     next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                    #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                     num_interval, num_interval_positive = 0, 0
                     lastEnergy, lastTime = None, None
@@ -337,7 +367,8 @@ class EnergyConsumption:
                 next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                 #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                 next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                 totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                 num_interval, num_interval_positive = 0, 0
                 lastEnergy, lastTime = None, None

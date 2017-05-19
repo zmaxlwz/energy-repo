@@ -82,8 +82,8 @@ class ComputeSwitchingTime:
         #step 3:  compute sunrise and sunset time 
         #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get components list
-        component_id_list = [951]
-        #component_id_list = self.getComponentsList()
+        #component_id_list = [951]
+        component_id_list = self.getComponentsList()
         #step 4:  call computeResults method
         self.computeResults(component_id_list)
 
@@ -100,7 +100,7 @@ class ComputeSwitchingTime:
             print("I am unable to get data")
 
         rows = self.cur.fetchall()    
-        return [row[0] for row in rows]
+        return [(row[1], row[0]) for row in rows]
 
     def computeDaytimeStartEnd(self, date):
         """
@@ -155,15 +155,15 @@ class ComputeSwitchingTime:
         count = 0
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('component_id', 'timestamp', 'log_value', 'is_log_value_off')
+            title_row = ('asset_id', 'component_id', 'timestamp', 'log_value', 'is_log_value_off')
             csvWriter.writerow(title_row)     
-            for component_id in component_id_list:
+            for component_id_tuple in component_id_list:
                 count += 1
                 #only compute for first 500 components
                 #if count > 500:
                 #    break
                 print(count)
-                results = self.computeTurnOnTime(component_id)
+                results = self.computeTurnOnTime(component_id_tuple)
                 #results = self.computeTurnOffTime(component_id)
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
@@ -173,13 +173,16 @@ class ComputeSwitchingTime:
                         csvWriter.writerow(record)
                 #self.plot(results)
                 
-    def computeTurnOnTime(self, component_id):
+    def computeTurnOnTime(self, component_id_tuple):
         """ using switching point table, compute the switching point turn-on time in minutes from day start
             this is for Barcelona dataset, turn-on time range is [14:00 - 22:00]
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
         timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
+
+        asset_id = component_id_tuple[0]
+        component_id = component_id_tuple[1]
 
         try:
             self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
@@ -214,7 +217,7 @@ class ComputeSwitchingTime:
                     #if currentTime.time() > datetime.time(20, 0, 0) and currentTime.time() < datetime.time(23, 59, 59):
                     if currentTime.time() > datetime.time(9) and currentTime.time() < datetime.time(17):    
                         #minutesFromDayStart = (currentTime - datetime.datetime.combine(currentTime.date(), datetime.time())).total_seconds() / 60.0
-                        results.append((component_id, currentTime, currentLogValue, currentIsLogValueOff))    
+                        results.append((asset_id, component_id, currentTime, currentLogValue, currentIsLogValueOff))    
                 #lastLogValue = currentLogValue
                 #lastIsLogValueOff = currentIsLogValueOff
                 #lastTime = currentTime 

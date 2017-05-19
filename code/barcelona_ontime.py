@@ -166,8 +166,11 @@ class ComputeSwitchingTime:
         current_date = None        
         for row in rows:   
 
-            #convert to Barcelona local time           
-            currentTime = row[1] + self.oneHourDelta
+            #convert to Barcelona local time   
+            # Jan +1 hour        
+            #currentTime = row[1] + self.oneHourDelta
+            # Sep +2 hours
+            currentTime = row[1] + self.twoHoursDelta
             currentLogValue = row[2]
             currentIsLogValueOff = row[3]
             if current_date is None:
@@ -189,7 +192,7 @@ class ComputeSwitchingTime:
                 numIntervals = 0 
                 switching_on_time = None      
 
-            if currentTime.time() > datetime.time(9) and currentTime.time() < datetime.time(17):
+            if currentTime.time() > datetime.time(7, 30) and currentTime.time() < datetime.time(20):
                 #it is within day time
                 if currentIsLogValueOff == False and switching_on_time is None:
                     switching_on_time = currentTime

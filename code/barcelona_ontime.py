@@ -192,7 +192,7 @@ class ComputeSwitchingTime:
                 numIntervals = 0 
                 switching_on_time = None      
 
-            if currentTime.time() > datetime.time(7, 30) and currentTime.time() < datetime.time(20):
+            if currentTime.time() > datetime.time(8, 30) and currentTime.time() < datetime.time(19):
                 #it is within day time
                 if currentIsLogValueOff == False and switching_on_time is None:
                     switching_on_time = currentTime

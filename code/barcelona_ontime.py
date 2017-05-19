@@ -92,7 +92,7 @@ class ComputeSwitchingTime:
 
         """                
         try:
-            self.cur.execute("select c.id, c.asset_id, c.installation_date \
+            self.cur.execute("select c.id, c.asset_id, a.latitude, a.longitude, a.installation_date, a.commissioning_date \
                               from assets as a, components as c \
                               where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
                               and a.id = c.asset_id and c.component_kind = 0")
@@ -100,7 +100,7 @@ class ComputeSwitchingTime:
             print("I am unable to get data")
 
         rows = self.cur.fetchall()    
-        return [(row[1], row[0]) for row in rows]
+        return [(row[1], row[0], row[2], row[3], row[4], row[5]) for row in rows]
 
     def computeResults(self, component_id_list):
         """ compute results
@@ -116,7 +116,7 @@ class ComputeSwitchingTime:
         count = 0
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('asset_id', 'component_id', 'current_date', 'num_intervals', 'total_on_time')
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'current_date', 'num_intervals', 'total_on_time')
             csvWriter.writerow(title_row)     
             for component_id_tuple in component_id_list:
                 count += 1
@@ -143,6 +143,10 @@ class ComputeSwitchingTime:
 
         asset_id = component_id_tuple[0]
         component_id = component_id_tuple[1]
+        latitude = component_id_tuple[2]
+        longitude = component_id_tuple[3]
+        installation_date = component_id_tuple[4]
+        commissioning_date = component_id_tuple[5]
 
         try:
             self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
@@ -178,7 +182,7 @@ class ComputeSwitchingTime:
                 #first write result
                 if totalOnTime > 0:
                     #write result
-                    results.append((asset_id, component_id, current_date, numIntervals, totalOnTime)) 
+                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, current_date, numIntervals, totalOnTime)) 
                 current_date = currentTime.date()
                 #reset variables for the new date
                 totalOnTime = 0
@@ -200,7 +204,7 @@ class ComputeSwitchingTime:
         
         if totalOnTime > 0:
             #write result
-            results.append((asset_id, component_id, current_date, numIntervals, totalOnTime)) 
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, current_date, numIntervals, totalOnTime)) 
 
         return results    
 

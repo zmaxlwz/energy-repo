@@ -99,8 +99,40 @@ class ComputeSwitchingTime:
         except:
             print("I am unable to get data")
 
-        rows = self.cur.fetchall()    
-        return [(row[1], row[0], row[2], row[3], row[4], row[5]) for row in rows]
+        rows = self.cur.fetchall()   
+        results = []
+        for row in rows:
+            asset_id = row[1]
+            component_id = row[0]
+            latitude = row[2]
+            longitude = row[3]
+            installation_date = row[4]
+            commissioning_date = row[5]
+
+            try:
+                self.cur.execute("select s.name as street_name \
+                                  from assets as a, streets as s \
+                                  where a.id = %s \
+                                  and a.street_id = s.id", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            street_name_data = self.cur.fetchall() 
+            street_name = street_name_data[0][0]
+
+            try:
+                self.cur.execute("select parent_id \
+                                  from components A,communications_nodes B \
+                                  where A.id=B.id and asset_id = %s", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            cabinet_id_data = self.cur.fetchall()     
+            cabinet_id = cabinet_id_data[0][0]
+
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
+
+        return results
 
     def computeResults(self, component_id_list):
         """ compute results
@@ -116,7 +148,7 @@ class ComputeSwitchingTime:
         count = 0
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'current_date', 'num_intervals', 'total_on_time')
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'current_date', 'num_intervals', 'total_on_time')
             csvWriter.writerow(title_row)     
             for component_id_tuple in component_id_list:
                 count += 1
@@ -147,6 +179,8 @@ class ComputeSwitchingTime:
         longitude = component_id_tuple[3]
         installation_date = component_id_tuple[4]
         commissioning_date = component_id_tuple[5]
+        street_name = component_id_tuple[6]
+        cabinet_id = component_id_tuple[7]
 
         try:
             self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
@@ -185,14 +219,14 @@ class ComputeSwitchingTime:
                 #first write result
                 if totalOnTime > 0:
                     #write result
-                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, current_date, numIntervals, totalOnTime)) 
+                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
                 current_date = currentTime.date()
                 #reset variables for the new date
                 totalOnTime = 0
                 numIntervals = 0 
                 switching_on_time = None      
 
-            if currentTime.time() > datetime.time(8, 30) and currentTime.time() < datetime.time(19):
+            if currentTime.time() > datetime.time(7, 30) and currentTime.time() < datetime.time(20):
                 #it is within day time
                 if currentIsLogValueOff == False and switching_on_time is None:
                     switching_on_time = currentTime
@@ -207,7 +241,7 @@ class ComputeSwitchingTime:
         
         if totalOnTime > 0:
             #write result
-            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, current_date, numIntervals, totalOnTime)) 
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
 
         return results    
 

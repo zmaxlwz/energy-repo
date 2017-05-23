@@ -1,5 +1,5 @@
-import datetime  
-from sunrise import sun 
+import datetime
+from sunrise import sun
 import psycopg2
 import csv
 import sys

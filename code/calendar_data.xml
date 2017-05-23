@@ -1,0 +1,240 @@
+<DimmingCalendar xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.citytouch.com/Common/v1.0">
+   <Id>41</Id>                                                                                                         
+   <IsDefault>false</IsDefault>                                                                                        
+   <Exceptions />                                                                                                      
+   <UserName>sergio.perez@philips.com</UserName>                                                                       
+   <shapes>                                                                                                            
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+     <DimmingShape>                                                                                                    
+       <Id>45</Id>                                                                                                     
+       <IsDefault>true</IsDefault>                                                                                     
+       <ShapeMode>AbsoluteMasked</ShapeMode>                                                                           
+       <SunriseOffset>0</SunriseOffset>                                                                                
+       <SunsetOffset>0</SunsetOffset>                                                                                  
+       <Items>                                                                                                         
+         <DimmingShapeItem>                                                                                            
+           <Id>60</Id>                                                                                                 
+           <Minutes>720</Minutes>                                                                                      
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>63</Id>                                                                                                 
+           <Minutes>1380</Minutes>                                                                                     
+           <Percent>30</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+         <DimmingShapeItem>                                                                                            
+           <Id>64</Id>                                                                                                 
+           <Minutes>1800</Minutes>                                                                                     
+           <Percent>40</Percent>                                                                                       
+           <Reason i:nil="true" />                                                                                     
+           <TimeMode>Absolute</TimeMode>                                                                               
+         </DimmingShapeItem>                                                                                           
+       </Items>                                                                                                        
+       <Name>Estándar</Name>                                                                                           
+       <Description>Las luces están encendidas entre el anochecer y el amanecer</Description>                          
+       <ColorArgb>4289179575</ColorArgb>                                                                               
+     </DimmingShape>                                                                                                   
+   </shapes>                                                                                                           
+ </DimmingCalendar>
+ 

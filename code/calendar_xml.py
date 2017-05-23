@@ -1,4 +1,5 @@
 import psycopg2
+import json
 import sys
 from xml_parser import XML_Parser
 

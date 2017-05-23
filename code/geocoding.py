@@ -74,8 +74,8 @@ class GeoCoding:
         count = 0
         for row in assets_list:
             count += 1            
-            if count > 4:
-                break
+            #if count > 4:
+            #    break
             #if count <= 19927:
             #    continue
             print(count)    

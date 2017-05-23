@@ -4,7 +4,7 @@ from xml_parser import XML_Parser
 
 class Calendar_XML_Analyzer:
 
-	def __init__(self, configJSONFilename, asset_id):
+    def __init__(self, configJSONFilename, asset_id):
         """ initialize variables
 
         """

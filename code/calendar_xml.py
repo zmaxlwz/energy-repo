@@ -42,19 +42,6 @@ class Calendar_XML_Analyzer:
             self.pg_password = config_data['pg_password']
             self.pg_host = config_data['pg_host']
             self.pg_port = config_data['pg_port']
-                 
-    def run(self):
-        """  call this method to run the program
-
-        """
-        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
-        self.getConfig(self.configFilename)
-        #step 2:  connect to db
-        self.connectDB()
-        #step 3:  compute sunrise and sunset time 
-        self.getCalendarXML(self.asset_id)
-        #step 4:  call computeResults method
-        #self.computeResults(component_id_list)
 
     def getCalendarXML(self, asset_id):
         """ get the last calendar revision XML for the input asset
@@ -91,10 +78,24 @@ class Calendar_XML_Analyzer:
 
         rows = self.cur.fetchall()
         calendar_xml = rows[0][0] 
+        #calendar_xml is of type str
+        #print(type(calendar_xml))
+        #print(calendar_xml) 
+        return calendar_xml      
 
-        print(type(calendar_xml))
-        print(calendar_xml)       
+    def run(self):
+        """  call this method to run the program
 
+        """
+        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
+        self.getConfig(self.configFilename)
+        #step 2:  connect to db
+        self.connectDB()
+        #step 3:  get the last calendar revision xml from the database 
+        calendar_xml_str = self.getCalendarXML(self.asset_id)
+        #step 4:  parse the calendar xml 
+        xml_parser = XML_Parser()
+        xml_parser.parse_from_string(calendar_xml_str)
 
 if __name__ == "__main__":
 

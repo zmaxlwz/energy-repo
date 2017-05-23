@@ -57,5 +57,5 @@ class XML_Parser:
 
 if __name__ == "__main__":
     file_path = "calendar_data.xml"  
-    XML_Parser = XML_Parser()
-    XML_Parser.parse_from_file(file_path)
+    xml_parser = XML_Parser()
+    xml_parser.parse_from_file(file_path)

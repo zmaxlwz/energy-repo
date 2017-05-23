@@ -55,4 +55,7 @@ class XML_Parser:
                 item_time_mode = dimming_shape_item.find('citytouch_ns:TimeMode', self.ns).text
                 print("--> ", item_id, item_minutes, item_percent, item_time_mode)
 
-  
+if __name__ == "__main__":
+    file_path = "calendar_data.xml"  
+    XML_Parser = XML_Parser()
+    XML_Parser.parse_from_file(file_path)

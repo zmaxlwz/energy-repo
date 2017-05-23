@@ -13,7 +13,7 @@ class GeoCoding:
         self.client = gmaps.Client(key = self.key)
         #self.table_name = 'streets_reverse_geocoded'
 
-        self.pg_dbname = "los_angeles"
+        self.pg_dbname = "citytouch_barcelona"
         self.pg_username = "awsmaster"
         self.pg_password = "philips2017"
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"
@@ -45,13 +45,13 @@ class GeoCoding:
     def getAssetsList(self):
         """ get assets list from assets table, 
             for LA, we are interested in the assets that are not deleted and commissioning_date are not null
-
+            for Barcelona, we are interested in the assets that are not deleted and installation_date is not null and commissioning_date is not null
         """                
         try:
             self.cur.execute("select id, latitude, longitude \
                               from assets \
                               where is_deleted = 'f' \
-                              and commissioning_date is not null")
+                              and installation_date is not null and commissioning_date is not null")
         except:
             print("I am unable to get data")
 
@@ -74,10 +74,10 @@ class GeoCoding:
         count = 0
         for row in assets_list:
             count += 1            
-            #if count > 4:
-            #    break
-            if count <= 19927:
-                continue
+            if count > 4:
+                break
+            #if count <= 19927:
+            #    continue
             print(count)    
             asset_id = row[0]
             asset_latitude = row[1]

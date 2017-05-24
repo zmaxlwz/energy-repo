@@ -13,7 +13,7 @@ class GeoCoding:
         self.client = gmaps.Client(key = self.key)
         #self.table_name = 'streets_reverse_geocoded'
 
-        self.pg_dbname = "citytouch_barcelona"
+        self.pg_dbname = "los_angeles"
         self.pg_username = "awsmaster"
         self.pg_password = "philips2017"
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"

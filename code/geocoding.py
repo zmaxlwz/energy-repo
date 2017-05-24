@@ -66,6 +66,32 @@ class GeoCoding:
 
         return assets_list
 
+    def getRemainingAssetsList(self):
+        """ get the assets list that are in assets table but not in streets_reverse_geocoded table
+
+        """    
+        try:
+            self.cur.execute("select id, latitude, longitude \
+                              from assets \
+                              where is_deleted = 'f' \
+                              and commissioning_date is not null \
+                              and id not in ( \
+                              select asset_id from streets_reverse_geocoded \
+                              )")
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall()  
+
+        assets_list = []
+        for row in rows:
+            asset_id = row[0]
+            asset_latitude = row[1]
+            asset_longitude = row[2]
+            assets_list.append((asset_id, asset_latitude, asset_longitude))
+
+        return assets_list    
+
     def reverseGeocoding(self, assets_list):
         """ perform reverse geocoding for each asset, each item is a tuple including asset_id, asset_latitude and asset_longitude
 
@@ -138,7 +164,8 @@ class GeoCoding:
 
         """
         self.connect_db()
-        assets_list = self.getAssetsList()
+        #assets_list = self.getAssetsList()
+        assets_list = self.getRemainingAssetsList()
         self.reverseGeocoding(assets_list)
         self.disconnect_db()
 

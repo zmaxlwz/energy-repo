@@ -149,12 +149,14 @@ class GeoCoding:
                 city_name = None
                 country_name = None
 
+            print(count, asset_id, street_name, city_name, country_name)  
+
             try:
                 self.cur.execute("insert into streets_reverse_geocoded \
                                   (id, asset_id, route, administrative_area_level_2, country) \
                                   values (%s, %s, %s, %s, %s)", (count, asset_id, street_name, city_name, country_name))
             except:
-                print("I am unable to get data")
+                print("I am unable to insert data")
 
             self.conn.commit()        
 

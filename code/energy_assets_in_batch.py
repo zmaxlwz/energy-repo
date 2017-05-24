@@ -13,9 +13,13 @@ class EnergyConsumption:
         """
         #configuration file name
         self.configFilename = configJSONFilename
-        #1 day delta
+        # 1 day delta
         self.oneDayDelta = datetime.timedelta(days=1)
-        
+        # 7 hours delta, LA in July is -7 from UTC
+        self.sevenHoursDelta = datetime.timedelta(hours=7)
+        # 8 hours delta, LA in Jan is -8 from UTC
+        self.eightHoursDelta = datetime.timedelta(hours=8)
+           
         #sunrise dict
         self.sunriseTimeDict = {}
         #sunset dict
@@ -27,14 +31,19 @@ class EnergyConsumption:
         #average sunrise time in CABA in UTC in 2016-5
         #self.sunrise_time_avg_utc = datetime.time(10, 40, 0)
         #average sunrise time in LA in UTC in 2017-1
-        self.sunrise_time_avg_utc = datetime.time(15, 0, 0)        
+        #self.sunrise_time_avg_utc = datetime.time(15, 0, 0)  
+        #average sunrise time in LA in local time in 2017-1
+        self.sunrise_time_avg_utc = datetime.time(7, 0, 0)  
+              
         #average sunset time in Jakarta in UTC
         #self.sunset_time_avg_utc = datetime.time(11, 4, 16)
         #self.sunset_time_avg_utc = datetime.time(11, 0, 0)
         #average sunset time in CABA in UTC in 2016-5
         #self.sunset_time_avg_utc = datetime.time(21, 0, 0)
         #average sunset time in LA in UTC in 2017-1
-        self.sunset_time_avg_utc = datetime.time(1, 0, 0)
+        #self.sunset_time_avg_utc = datetime.time(1, 0, 0)
+        #average sunset time in LA in local time in 2017-1
+        self.sunset_time_avg_utc = datetime.time(17, 0, 0)
         
         #assets latitude dict
         self.assets_latitude_dict = {}
@@ -189,11 +198,11 @@ class EnergyConsumption:
                               and a.street_id = s.id")
             '''
             #for LA
-            self.cur.execute("select a.id, a.latitude, a.longitude, a.installation_date, a.commissioning_date, s.name as street_name \
-                              from assets as a, streets as s \
+            self.cur.execute("select a.id, a.latitude, a.longitude, a.installation_date, a.commissioning_date, s.route as street_name \
+                              from assets as a, streets_reverse_geocoded as s \
                               where a.is_deleted = 'f' \
                               and a.commissioning_date is not null \
-                              and a.street_id = s.id")                  
+                              and a.id = s.asset_id")                  
         except:
             print("I am unable to get data")
 
@@ -256,17 +265,19 @@ class EnergyConsumption:
         #print("before query for kwh data")
 
         try:
-            self.cur.execute("select b.asset_id , a.kwh, a.timestamp_utc \
+            #there might be multiple lights in an assets, so need to order by asset_id and component_id
+            self.cur.execute("select b.asset_id , b.meter_component_id, a.kwh, a.timestamp_utc \
                               from energy_metering_points b, energy_meter_readings a \
                               where b.asset_id in %s and b.id = a.metering_point_id \
                               and a.timestamp_utc >= %s and a.timestamp_utc < %s \
-                              order by b.asset_id, a.timestamp_utc", (assets_id_tuple, first_date_time, last_date_time))
+                              order by b.asset_id, b.meter_component_id, a.timestamp_utc", (assets_id_tuple, first_date_time, last_date_time))
         except:
             print("I am unable to get data")
 
         #print("finished query for kwh data")    
 
         current_asset_id = None
+        current_meter_component_id = None
         count = 0
 
         rows = self.cur.fetchmany(50000)
@@ -274,9 +285,11 @@ class EnergyConsumption:
             #process each record in order 
             for row in rows:   
                 row_asset_id = row[0]
-                row_energy = row[1]
-                row_time = row[2]
-                if current_asset_id is None or current_asset_id != row_asset_id:
+                row_meter_component_id = row[1]
+                row_energy = row[2]
+                # convert time from UTC to local time
+                row_time = row[3] - self.eightHoursDelta
+                if current_asset_id is None or current_asset_id != row_asset_id or current_meter_component_id != row_meter_component_id:
                     #it is a new asset
                     if current_asset_id is not None:
                         if totalOnTime == 0:
@@ -285,9 +298,10 @@ class EnergyConsumption:
                             totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
                         if totalOnTime > self.onTimeThreshold:
                             current_date = next_date_day_end_time.date()
-                            results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+                            results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                 
                     current_asset_id = row_asset_id 
+                    current_meter_component_id = row_meter_component_id
                     count += 1
                     #print(count)
                     current_asset_latitude = self.assets_latitude_dict[current_asset_id]
@@ -309,8 +323,8 @@ class EnergyConsumption:
                     next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                     #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                     next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                    #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
-                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
+                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                    #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                     num_interval, num_interval_positive = 0, 0
                     lastEnergy, lastTime = None, None
@@ -360,15 +374,15 @@ class EnergyConsumption:
                     totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
                 if totalOnTime > self.onTimeThreshold:
                     current_date = next_date_day_end_time.date()
-                    results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+                    results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                 
                 next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_utc)
                 #next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
                 next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                 #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                 next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
-                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
+                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                 totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                 num_interval, num_interval_positive = 0, 0
                 lastEnergy, lastTime = None, None
@@ -387,7 +401,7 @@ class EnergyConsumption:
             totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
         if totalOnTime > self.onTimeThreshold:
             current_date = next_date_day_end_time.date()
-            results.append((current_asset_region_name, current_date, current_asset_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
+            results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                 
         return results          
 
@@ -397,7 +411,7 @@ class EnergyConsumption:
         """
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
-            title_row = ('region', 'date', 'asset_id', 'luminaire_type', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'nominal_wattage', 'street_name', 'timespan', 'first_timestamp', 'last_timestamp', 'energyConsumedKwh', 'energyConsumedWatts', 'numIntervals', 'numPositiveIntervals')         
+            title_row = ('region', 'date', 'asset_id', 'meter_component_id', 'luminaire_type', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'nominal_wattage', 'street_name', 'timespan', 'first_timestamp', 'last_timestamp', 'energyConsumedKwh', 'energyConsumedWatts', 'numIntervals', 'numPositiveIntervals')         
             csvWriter.writerow(title_row)
             for record in results:
                 csvWriter.writerow(record)

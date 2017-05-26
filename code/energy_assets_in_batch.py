@@ -92,7 +92,7 @@ class EnergyConsumption:
             self.outputFilename = config_data['output_csvfile_name']
             #define energyThreshold: 2 watt
             self.energyThreshold = int(config_data['energy_threshold'])  
-            #define onTime threshold for a day: in seconds
+            #define onTime threshold for a day: in minutes
             self.onTimeThreshold = int(config_data['onTime_threshold'])  
             #define nominal wattage ratio
             self.nominal_wattage_ratio = float(config_data['nominal_wattage_ratio'])
@@ -295,7 +295,7 @@ class EnergyConsumption:
                         if totalOnTime == 0:
                             totalWatts = 0
                         else:
-                            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
+                            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 60.0)  
                         if totalOnTime > self.onTimeThreshold:
                             current_date = next_date_day_end_time.date()
                             results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
@@ -359,7 +359,7 @@ class EnergyConsumption:
                         #print(row)
                         #print(energyConsumed, consumptionRate, secondsInterval)
                         if consumptionRate > current_asset_nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold:
-                            totalOnTime += secondsInterval
+                            totalOnTime += secondsInterval / 60.0
                             totalEnergyConsumed += energyConsumed
                             num_interval_positive += 1
                                     
@@ -371,7 +371,7 @@ class EnergyConsumption:
                 if totalOnTime == 0:
                     totalWatts = 0
                 else:
-                    totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
+                    totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 60.0)  
                 if totalOnTime > self.onTimeThreshold:
                     current_date = next_date_day_end_time.date()
                     results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
@@ -398,7 +398,7 @@ class EnergyConsumption:
         if totalOnTime == 0:
             totalWatts = 0
         else:
-            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 3600.0)  
+            totalWatts = (totalEnergyConsumed * 1000) / (totalOnTime / 60.0)  
         if totalOnTime > self.onTimeThreshold:
             current_date = next_date_day_end_time.date()
             results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))

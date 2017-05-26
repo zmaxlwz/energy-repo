@@ -65,7 +65,7 @@ class GetHardwareID:
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
             for hardware_id in hardware_id_list:
-                csvWriter.writerow(hardware_id) 
+                csvWriter.writerow((hardware_id,)) 
 
     def run(self):
         """ run the program
@@ -73,7 +73,7 @@ class GetHardwareID:
         """               
         self.connect_db()
         hardware_id_list = self.get_hardware_id()
-        self.write_to_file((hardware_id_list,))
+        self.write_to_file(hardware_id_list)
         self.disconnect_db()
 
 if __name__ == "__main__":

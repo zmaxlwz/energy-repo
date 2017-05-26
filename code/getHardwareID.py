@@ -4,13 +4,13 @@ import csv
 import json
 
 class GetHardwareID:
-	def __init__(self, outputFilename):
-		""" initialize some variables
+    def __init__(self, outputFilename):
+        """ initialize some variables
 
-		"""
-		self.outputFilename = outputFilename
+        """
+        self.outputFilename = outputFilename
 
-		self.pg_dbname = "los_angeles"
+        self.pg_dbname = "los_angeles"
         self.pg_username = "awsmaster"
         self.pg_password = "philips2017"
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"
@@ -53,8 +53,8 @@ class GetHardwareID:
 
         hardware_id_list = []
         for row in rows:
-        	hardware_id = row[0]
-        	hardware_id_list.append(hardware_id)
+            hardware_id = row[0]
+            hardware_id_list.append(hardware_id)
 
         return hardware_id_list
         
@@ -77,9 +77,9 @@ class GetHardwareID:
         self.disconnect_db()
 
 if __name__ == "__main__":
-	outputFilename = sys.argv[1]
-	getHardwareID = GetHardwareID(outputFilename)
-	getHardwareID.run()
+    outputFilename = sys.argv[1]
+    getHardwareID = GetHardwareID(outputFilename)
+    getHardwareID.run()
 
 
 

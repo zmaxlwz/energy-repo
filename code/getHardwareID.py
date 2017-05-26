@@ -73,7 +73,7 @@ class GetHardwareID:
         """               
         self.connect_db()
         hardware_id_list = self.get_hardware_id()
-        self.write_to_file(hardware_id_list)
+        self.write_to_file((hardware_id_list,))
         self.disconnect_db()
 
 if __name__ == "__main__":

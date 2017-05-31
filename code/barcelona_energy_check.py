@@ -95,7 +95,7 @@ class BarcelonaEnergyCheck:
                 else:
                     currentDailyEnergyConsumption = currentEnergy - lastEnergy
                     if currentDailyEnergyConsumption - lastDailyEnergyConsumption > 0.1:
-                        print(asset_id, lastDailyEnergyConsumption, currentDailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy)
+                        print(asset_id, currentDailyEnergyConsumption - lastDailyEnergyConsumption, lastDailyEnergyConsumption, currentDailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy)
                     lastDailyEnergyConsumption = currentDailyEnergyConsumption
                 lastTime = currentTime    
                 lastDate = currentDate

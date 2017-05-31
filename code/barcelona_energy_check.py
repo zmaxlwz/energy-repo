@@ -95,7 +95,7 @@ class BarcelonaEnergyCheck:
                 else:
                     currentDailyEnergyConsumption = currentEnergy - lastEnergy
                     if currentDailyEnergyConsumption - lastDailyEnergyConsumption > 0.1:
-                        print(asset_id, lastTime, lastEnergy, currentTime, currentEnergy)
+                        print(asset_id, lastDailyEnergyConsumption, currentDailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy)
                     lastDailyEnergyConsumption = currentDailyEnergyConsumption
                 lastTime = currentTime    
                 lastDate = currentDate
@@ -107,7 +107,7 @@ class BarcelonaEnergyCheck:
         """               
         self.connect_db()
         #asset_id_list = self.get_asset_id_list()
-        asset_id_list = [2063]
+        asset_id_list = [2063, 2, 3, 10, 11]
         for asset_id in asset_id_list:
             self.check_energy_for_asset(asset_id)
         self.disconnect_db()

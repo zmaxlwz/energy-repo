@@ -107,7 +107,8 @@ class BarcelonaEnergyCheck:
         """               
         self.connect_db()
         #asset_id_list = self.get_asset_id_list()
-        asset_id_list = [2063, 2, 3, 10, 11]
+        #asset_id_list = [2063, 2, 3, 10, 11]
+        asset_id_list = [2063]
         for asset_id in asset_id_list:
             self.check_energy_for_asset(asset_id)
         self.disconnect_db()

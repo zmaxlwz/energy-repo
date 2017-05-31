@@ -2,6 +2,7 @@ import sys
 import psycopg2
 import csv
 import json
+import datetime
 
 class BarcelonaEnergyCheck:
     def __init__(self):
@@ -99,7 +100,43 @@ class BarcelonaEnergyCheck:
                     lastDailyEnergyConsumption = currentDailyEnergyConsumption
                 lastTime = currentTime    
                 lastDate = currentDate
-                lastEnergy = currentEnergy                    
+                lastEnergy = currentEnergy    
+
+    def print_energy_consumption_for_asset(self, asset_id, start_time, end_time):
+        """ print daily energy consumption for the input asset
+
+        """
+        try:
+            self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
+                              from energy_metering_points b, energy_meter_readings a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.timestamp_utc >= %s and a.timestamp_utc < %s \
+                              order by b.asset_id, a.timestamp_utc", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        lastTime = None
+        lastDate = None
+        lastEnergy = None
+        for row in rows:
+            if lastDate is None:
+                # it is the first date
+                lastTime = row[2]
+                lastDate = lastTime.date()
+                lastEnergy = row[1]
+            elif row[2].date() != lastDate:
+                # it is a new date
+                currentTime = row[2]
+                currentDate = currentTime.date()
+                currentEnergy = row[1] 
+                dailyEnergyConsumption = currentEnergy - lastEnergy
+                print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
+                lastTime = currentTime    
+                lastDate = currentDate
+                lastEnergy = currentEnergy 
+
 
     def run(self):
         """ run the program
@@ -109,8 +146,13 @@ class BarcelonaEnergyCheck:
         #asset_id_list = self.get_asset_id_list()
         #asset_id_list = [2063, 2, 3, 10, 11]
         asset_id_list = [2063]
+        
+        start_time = datetime.datetime(2017, 2, 17, 0, 0, 0)
+        end_time = datetime.datetime(2017, 3, 16, 0, 0, 0)
+
         for asset_id in asset_id_list:
-            self.check_energy_for_asset(asset_id)
+            #self.check_energy_for_asset(asset_id)
+            self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
         self.disconnect_db()
 
 if __name__ == "__main__":

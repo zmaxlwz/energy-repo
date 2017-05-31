@@ -95,7 +95,7 @@ class BarcelonaEnergyCheck:
                 else:
                     currentDailyEnergyConsumption = currentEnergy - lastEnergy
                     if currentDailyEnergyConsumption - lastDailyEnergyConsumption > 0.1:
-                        print('{0} {1:.4f} {2:.4f} {3:.4f} {4} {5:3.1f} {6} {7:3.1f}'.format(asset_id, currentDailyEnergyConsumption - lastDailyEnergyConsumption, lastDailyEnergyConsumption, currentDailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
+                        print('{0} {1:.4f} {2:.4f} {3:.4f} {4} {5:3d.1f} {6} {7:3d.1f}'.format(asset_id, currentDailyEnergyConsumption - lastDailyEnergyConsumption, lastDailyEnergyConsumption, currentDailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
                     lastDailyEnergyConsumption = currentDailyEnergyConsumption
                 lastTime = currentTime    
                 lastDate = currentDate

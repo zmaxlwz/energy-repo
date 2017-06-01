@@ -3,6 +3,7 @@ import psycopg2
 import csv
 import json
 import datetime
+import statistics
 
 class BarcelonaEnergyCheck:
     def __init__(self):
@@ -137,10 +138,73 @@ class BarcelonaEnergyCheck:
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
 
-        count = 0
+    def find_dayburners_by_energy_deviation(self, asset_id, start_time, end_time):
+        """ detect dayburners by checking the energy consumption deviation from the mean 
+            if deviate more than 1 std from mean, then the energy consumption is either too low or too high
+
+        """
+        try:
+            self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
+                              from energy_metering_points b, energy_meter_readings a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.timestamp_utc >= %s and a.timestamp_utc < %s \
+                              order by b.asset_id, a.timestamp_utc", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        energy_list = []
+        lastTime = None
+        lastDate = None
+        lastEnergy = None
         for row in rows:
-            count += 1        
-        print(count)    
+            if lastDate is None:
+                # it is the first date
+                lastTime = row[2]
+                lastDate = lastTime.date()
+                lastEnergy = row[1]
+            elif row[2].date() != lastDate:
+                # it is a new date
+                currentTime = row[2]
+                currentDate = currentTime.date()
+                currentEnergy = row[1] 
+                energyConsumption = currentEnergy - lastEnergy
+                num_days = (currentDate - lastDate).days
+                energy_list.append(energyConsumption / num_days)
+                #update record
+                lastTime = currentTime    
+                lastDate = currentDate
+                lastEnergy = currentEnergy 
+        #compute the mean and std of energy consumption        
+        avg_energy_consumption = statistics.mean(energy_list)
+        std_energy_consumption = statistics.stdev(energy_list)
+
+        lastTime = None
+        lastDate = None
+        lastEnergy = None
+        for row in rows:
+            if lastDate is None:
+                # it is the first date
+                lastTime = row[2]
+                lastDate = lastTime.date()
+                lastEnergy = row[1]
+            elif row[2].date() != lastDate:
+                # it is a new date
+                currentTime = row[2]
+                currentDate = currentTime.date()
+                currentEnergy = row[1] 
+                energyConsumption = currentEnergy - lastEnergy
+                num_days = (currentDate - lastDate).days
+                dailyEnergyConsumption = energyConsumption / num_days
+                num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
+                if num_std < -1 or num_std > 1:
+                    #report this abnormal case
+                    print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
+                #update record
+                lastTime = currentTime    
+                lastDate = currentDate
+                lastEnergy = currentEnergy 
 
 
     def run(self):
@@ -157,7 +221,8 @@ class BarcelonaEnergyCheck:
 
         for asset_id in asset_id_list:
             #self.check_energy_for_asset(asset_id)
-            self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
+            #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
+            self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
         self.disconnect_db()
 
 if __name__ == "__main__":

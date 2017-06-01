@@ -200,7 +200,7 @@ class BarcelonaEnergyCheck:
                 num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                 if num_std < -1 or num_std > 1:
                     #report this abnormal case
-                    print('{0} {1:5.1f} {2:-5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
+                    print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
                 #update record
                 lastTime = currentTime    
                 lastDate = currentDate

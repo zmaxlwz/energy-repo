@@ -57,6 +57,7 @@ class Calendar_XML_Analyzer:
 
         rows = self.cur.fetchall()
         component_id = rows[0][0]
+        print(component_id)
 
         try:
                 self.cur.execute("select dimming_calendar_id \

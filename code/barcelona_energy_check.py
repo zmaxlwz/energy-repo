@@ -137,6 +137,11 @@ class BarcelonaEnergyCheck:
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
 
+        count = 0
+        for row in rows:
+            count += 1        
+        print(count)    
+
 
     def run(self):
         """ run the program

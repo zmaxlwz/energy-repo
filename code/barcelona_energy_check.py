@@ -237,7 +237,8 @@ class BarcelonaEnergyCheck:
                     #num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                     energy_deviation = dailyEnergyConsumption - avg_energy_consumption
                     #if num_std < -1.5 or num_std > 1.5:
-                    if energy_deviation < -0.2 or energy_deviation > 0.2:
+                    #if energy_deviation < -0.2 or energy_deviation > 0.2:
+                    if energy_deviation > 0.2:    
                         #report this abnormal case
                         #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
                         #results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
@@ -298,8 +299,8 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
         #asset_id_list = self.get_assets_list()
 
-        start_time = datetime.datetime(2017, 1, 1, 0, 0, 0)
-        end_time = datetime.datetime(2017, 4, 1, 0, 0, 0)
+        start_time = datetime.datetime(2016, 11, 1, 0, 0, 0)
+        end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
         
         results = []
         for asset_id in asset_id_list:

@@ -299,11 +299,15 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
         asset_id_list = self.get_assets_list()
 
-        start_time = datetime.datetime(2016, 11, 1, 0, 0, 0)
+        start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
         
+        print("total assets: ", len(asset_id_list))
         results = []
+        count = 0
         for asset_id in asset_id_list:
+            count += 1
+            print(count)
             #self.check_energy_for_asset(asset_id)
             #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
             #results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)

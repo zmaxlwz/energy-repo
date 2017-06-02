@@ -193,7 +193,66 @@ class BarcelonaEnergyCheck:
                 lastTime = currentTime    
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
-        return results        
+        return results   
+
+    def find_dayburners_energy_deviation_rolling_window_avg(self, asset_id, start_time, end_time):
+        """ find dayburners by calculating energy deviation from 30 day rolling window average 
+            if deviation < -0.2 kwh or deviation > 0.2 kwh, report that record
+        """
+        try:
+            self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
+                              from energy_metering_points b, energy_meter_readings a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.timestamp_utc >= %s and a.timestamp_utc < %s \
+                              order by b.asset_id, a.timestamp_utc", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        energy_rolling_window = []
+        lastTime = None
+        lastDate = None
+        lastEnergy = None
+        for row in rows:
+            if lastDate is None:
+                # it is the first date
+                lastTime = row[2]
+                lastDate = lastTime.date()
+                lastEnergy = row[1]
+            elif row[2].date() != lastDate:
+                # it is a new date
+                currentTime = row[2]
+                currentDate = currentTime.date()
+                currentEnergy = row[1] 
+                energyConsumption = currentEnergy - lastEnergy
+                num_days = (currentDate - lastDate).days
+                dailyEnergyConsumption = energyConsumption / num_days
+                if len(energy_rolling_window) = 30:
+                    # the rolling window is full
+                    # compute the mean and std of energy consumption within the rolling window       
+                    avg_energy_consumption = statistics.mean(energy_rolling_window)
+                    std_energy_consumption = statistics.stdev(energy_rolling_window)
+                    #num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
+                    energy_deviation = dailyEnergyConsumption - avg_energy_consumption
+                    #if num_std < -1.5 or num_std > 1.5:
+                    if energy_deviation < -0.2 or energy_deviation > 0.2:
+                        #report this abnormal case
+                        #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
+                        #results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                        results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, energy_deviation))
+                    #update rolling window    
+                    energy_rolling_window.pop(0)
+                    energy_rolling_window.append(dailyEnergyConsumption)    
+                else:
+                    # the rolling window is not full, just append new element to the end of the rolling window
+                    energy_rolling_window.append(dailyEnergyConsumption)    
+                #update record
+                lastTime = currentTime    
+                lastDate = currentDate
+                lastEnergy = currentEnergy 
+        return results 
+
 
     def get_assets_list(self):
         """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
@@ -234,18 +293,19 @@ class BarcelonaEnergyCheck:
         """               
         self.connect_db()
         #asset_id_list = [2063, 2, 3, 10, 11]
-        #asset_id_list = [2063]
+        asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        asset_id_list = self.get_assets_list()
+        #asset_id_list = self.get_assets_list()
 
-        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
-        end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)
+        start_time = datetime.datetime(2017, 1, 1, 0, 0, 0)
+        end_time = datetime.datetime(2017, 4, 1, 0, 0, 0)
         
         results = []
         for asset_id in asset_id_list:
             #self.check_energy_for_asset(asset_id)
             #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
-            results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
+            #results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
+            results += self.find_dayburners_energy_deviation_rolling_window_avg(asset_id, start_time, end_time)
         self.write_to_file(results)    
         self.disconnect_db()
 

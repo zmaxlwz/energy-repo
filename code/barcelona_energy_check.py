@@ -211,6 +211,7 @@ class BarcelonaEnergyCheck:
         rows = self.cur.fetchall()
 
         energy_rolling_window = []
+        results = []
         lastTime = None
         lastDate = None
         lastEnergy = None

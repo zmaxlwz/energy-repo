@@ -228,7 +228,7 @@ class BarcelonaEnergyCheck:
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
                 dailyEnergyConsumption = energyConsumption / num_days
-                if len(energy_rolling_window) = 30:
+                if len(energy_rolling_window) == 30:
                     # the rolling window is full
                     # compute the mean and std of energy consumption within the rolling window       
                     avg_energy_consumption = statistics.mean(energy_rolling_window)

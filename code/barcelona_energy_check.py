@@ -181,11 +181,14 @@ class BarcelonaEnergyCheck:
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
                 dailyEnergyConsumption = energyConsumption / num_days
-                num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
-                if num_std < -1.5 or num_std > 1.5:
+                #num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
+                energy_deviation = dailyEnergyConsumption - avg_energy_consumption
+                #if num_std < -1.5 or num_std > 1.5:
+                if energy_deviation < -0.2 or energy_deviation > 0.2:
                     #report this abnormal case
                     #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
-                    results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                    #results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                    results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, energy_deviation))
                 #update record
                 lastTime = currentTime    
                 lastDate = currentDate
@@ -219,7 +222,8 @@ class BarcelonaEnergyCheck:
         """
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
-            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')         
+            #title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')  
+            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'energy_deviation')       
             csvWriter.writerow(title_row)
             for record in results:
                 csvWriter.writerow(record)

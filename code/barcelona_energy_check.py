@@ -259,6 +259,7 @@ class BarcelonaEnergyCheck:
             #self.check_energy_for_asset(asset_id)
             #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
             results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
+        self.write_to_file(results)    
         self.disconnect_db()
 
 if __name__ == "__main__":

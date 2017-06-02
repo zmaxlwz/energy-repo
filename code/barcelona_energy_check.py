@@ -40,27 +40,6 @@ class BarcelonaEnergyCheck:
         """    
         self.cur.close()
         self.conn.close()
-
-    def get_asset_id_list(self):
-        """ get asset id list
-
-        """     
-        try:
-            self.cur.execute("select id \
-                              from assets \
-                              where is_deleted = 'f' \
-                              and installation_date is not null and commissioning_date is not null")
-        except:
-            print("I am unable to get data")
-
-        rows = self.cur.fetchall() 
-
-        asset_id_list = []
-        for row in rows:
-            asset_id = row[0]
-            asset_id_list.append(asset_id) 
-
-        return asset_id_list
         
     def check_energy_for_asset(self, asset_id):
         """ check the energy consumption for each day in Barcelona, 
@@ -203,7 +182,7 @@ class BarcelonaEnergyCheck:
                 num_days = (currentDate - lastDate).days
                 dailyEnergyConsumption = energyConsumption / num_days
                 num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
-                if num_std < -1 or num_std > 1:
+                if num_std < -1.5 or num_std > 1.5:
                     #report this abnormal case
                     #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
                     results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
@@ -250,11 +229,10 @@ class BarcelonaEnergyCheck:
 
         """               
         self.connect_db()
-        #asset_id_list = self.get_asset_id_list()
         #asset_id_list = [2063, 2, 3, 10, 11]
         #asset_id_list = [2063]
-        asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        #asset_id_list = self.get_assets_list()
+        #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
+        asset_id_list = self.get_assets_list()
 
         start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
         end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)

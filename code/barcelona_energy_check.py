@@ -10,7 +10,7 @@ class BarcelonaEnergyCheck:
         """ initialize some variables
 
         """
-        #self.outputFilename = outputFilename
+        self.outputFilename = "output.csv"
 
         self.pg_dbname = "citytouch_barcelona"
         self.pg_username = "awsmaster"
@@ -180,6 +180,7 @@ class BarcelonaEnergyCheck:
         avg_energy_consumption = statistics.mean(energy_list)
         std_energy_consumption = statistics.stdev(energy_list)
 
+        results = []
         lastTime = None
         lastDate = None
         lastEnergy = None
@@ -200,12 +201,45 @@ class BarcelonaEnergyCheck:
                 num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                 if num_std < -1 or num_std > 1:
                     #report this abnormal case
-                    print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
+                    #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
+                    results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
                 #update record
                 lastTime = currentTime    
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
+        return results        
 
+    def get_assets_list(self):
+        """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
+
+        """                
+        try:            
+            self.cur.execute("select id \
+                              from assets \
+                              where is_deleted = 'f' \
+                              and installation_date is not null and commissioning_date is not null")            
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall()  
+
+        assets_id_list = []
+        for row in rows:
+            asset_id = row[0]
+            assets_id_list.append(asset_id)
+
+        return assets_id_list              
+
+    def write_to_file(self, results):
+        """ write results to output file
+
+        """
+        with open(self.outputFilename, "w") as csvFile:
+            csvWriter = csv.writer(csvFile, delimiter=',')   
+            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')         
+            csvWriter.writerow(title_row)
+            for record in results:
+                csvWriter.writerow(record)
 
     def run(self):
         """ run the program
@@ -214,15 +248,17 @@ class BarcelonaEnergyCheck:
         self.connect_db()
         #asset_id_list = self.get_asset_id_list()
         #asset_id_list = [2063, 2, 3, 10, 11]
-        asset_id_list = [2063]
+        #asset_id_list = [2063]
+        asset_id_list = self.get_assets_list()
 
-        start_time = datetime.datetime(2016, 12, 1, 0, 0, 0)
-        end_time = datetime.datetime(2017, 3, 31, 0, 0, 0)
-
+        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
+        end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)
+        
+        results = []
         for asset_id in asset_id_list:
             #self.check_energy_for_asset(asset_id)
             #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
-            self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
+            results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
         self.disconnect_db()
 
 if __name__ == "__main__":

@@ -241,7 +241,7 @@ class BarcelonaEnergyCheck:
                     else:    
                         num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                         #if num_std < -1.5 or num_std > 1.5:
-                        if num_std > 1.5:
+                        if num_std > 1.5 and dailyEnergyConsumption - avg_energy_consumption > 0.2:
                             results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
                     '''
                     energy_deviation = dailyEnergyConsumption - avg_energy_consumption

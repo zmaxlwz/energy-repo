@@ -195,10 +195,19 @@ class BarcelonaEnergyCheck:
                 lastEnergy = currentEnergy 
         return results   
 
-    def find_dayburners_energy_deviation_rolling_window_avg(self, asset_id, start_time, end_time):
+    def find_dayburners_energy_deviation_rolling_window_avg(self, asset_tuple, start_time, end_time):
         """ find dayburners by calculating energy deviation from 30 day rolling window average 
-            if deviation < -0.2 kwh or deviation > 0.2 kwh, report that record
+            if # of stdev > 1.5 and deviation > 0.2 kwh, report that record
         """
+
+        asset_id = asset_tuple[0]
+        latitude = asset_tuple[1]
+        longitude = asset_tuple[2]
+        installation_date = asset_tuple[3]
+        commissioning_date = asset_tuple[4]
+        street_name = asset_tuple[5]
+        cabinet_id = asset_tuple[6]
+
         try:
             self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
                               from energy_metering_points b, energy_meter_readings a \
@@ -237,12 +246,12 @@ class BarcelonaEnergyCheck:
                     std_energy_consumption = statistics.stdev(energy_rolling_window)
                     if std_energy_consumption == 0:
                         if dailyEnergyConsumption - avg_energy_consumption > 0.2:
-                            results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, None))
+                            results.append((asset_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, None))
                     else:    
                         num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                         #if num_std < -1.5 or num_std > 1.5:
                         if num_std > 1.5 and dailyEnergyConsumption - avg_energy_consumption > 0.2:
-                            results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                            results.append((asset_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
                     '''
                     energy_deviation = dailyEnergyConsumption - avg_energy_consumption
                     #if energy_deviation < -0.2 or energy_deviation > 0.2:
@@ -270,7 +279,7 @@ class BarcelonaEnergyCheck:
 
         """                
         try:            
-            self.cur.execute("select id \
+            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
                               from assets \
                               where is_deleted = 'f' \
                               and installation_date is not null and commissioning_date is not null")            
@@ -279,12 +288,38 @@ class BarcelonaEnergyCheck:
 
         rows = self.cur.fetchall()  
 
-        assets_id_list = []
+        results = []
         for row in rows:
             asset_id = row[0]
-            assets_id_list.append(asset_id)
+            latitude = row[1]
+            longitude = row[2]
+            installation_date = row[3]
+            commissioning_date = row[4]
 
-        return assets_id_list              
+            try:
+                self.cur.execute("select s.name as street_name \
+                                  from assets as a, streets as s \
+                                  where a.id = %s \
+                                  and a.street_id = s.id", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            street_name_data = self.cur.fetchall() 
+            street_name = street_name_data[0][0]
+
+            try:
+                self.cur.execute("select parent_id \
+                                  from components A,communications_nodes B \
+                                  where A.id=B.id and asset_id = %s", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            cabinet_id_data = self.cur.fetchall()     
+            cabinet_id = cabinet_id_data[0][0]
+
+            results.append((asset_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
+
+        return results              
 
     def write_to_file(self, results):
         """ write results to output file
@@ -292,7 +327,7 @@ class BarcelonaEnergyCheck:
         """
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
-            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')  
+            title_row = ('asset_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')  
             #title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'energy_deviation')       
             csvWriter.writerow(title_row)
             for record in results:
@@ -307,23 +342,23 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
         #asset_id_list = [816]
-        asset_id_list = self.get_assets_list()
+        asset_tuple_list = self.get_assets_list()
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
         start_time = datetime.datetime(2016, 8, 1, 0, 0, 0)
         end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)        
         
-        print("total assets: ", len(asset_id_list))
+        print("total assets: ", len(asset_tuple_list))
         results = []
         count = 0
-        for asset_id in asset_id_list:
+        for asset_tuple in asset_tuple_list:
             count += 1
             print(count)
             #self.check_energy_for_asset(asset_id)
             #self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
             #results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
-            results += self.find_dayburners_energy_deviation_rolling_window_avg(asset_id, start_time, end_time)
+            results += self.find_dayburners_energy_deviation_rolling_window_avg(asset_tuple, start_time, end_time)
         self.write_to_file(results)    
         self.disconnect_db()
 

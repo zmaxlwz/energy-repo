@@ -120,43 +120,21 @@ class ComputeSwitchingTime:
 
         return results
 
-    def computeResults(self, component_id_list):
-        """ compute results
-
-        """    
-        #id = 3776
-        #latitude = -6.118187
-        #longitude = 106.894265
-        #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
-        #assets = [(100280, -6.097081, 106.978368)]
-        #assets = self.getAssetsList()
-        #print(assets)
-        count = 0
-        with open(self.outputFilename, "w") as csvFile:
-            csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'current_date', 'num_intervals', 'total_on_time')
-            csvWriter.writerow(title_row)     
-            for component_id_tuple in component_id_list:
-                count += 1
-                #only compute for first 500 components
-                #if count > 500:
-                #    break
-                print(count)
-                results = self.computeOnTime(component_id_tuple)
-                #print('len of results: ', len(results))
-                #the results returned is a list of tuples
-                if len(results) > 0:
-                    for record in results:
-                        #csvWriter.writerow(results)
-                        csvWriter.writerow(record)
-                #self.plot(results)
-
-    def compute_light_on_time(self, component_id, start_time, end_time):
+    def compute_light_on_time(self, component_id_tuple, start_time, end_time):
         """ use switching point table, compute the light on time for the input component from [0:00 - 23:59:59] in UTC
 
         """
         #timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
         #timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
+
+        asset_id = component_id_tuple[0]
+        component_id = component_id_tuple[1]
+        latitude = component_id_tuple[2]
+        longitude = component_id_tuple[3]
+        installation_date = component_id_tuple[4]
+        commissioning_date = component_id_tuple[5]
+        street_name = component_id_tuple[6]
+        cabinet_id = component_id_tuple[7]
 
         try:
             self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
@@ -199,8 +177,8 @@ class ComputeSwitchingTime:
                 #first write result
                 if totalOnTime > 0:
                     #write result
-                    #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-                    results.append((component_id, current_date, numIntervals, totalOnTime))
+                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+                    #results.append((component_id, current_date, numIntervals, totalOnTime))
                 current_date = currentTime.date()
                 #reset variables for the new date
                 totalOnTime = 0
@@ -226,8 +204,8 @@ class ComputeSwitchingTime:
 
         if totalOnTime > 0:
             #write result
-            #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-            results.append((component_id, current_date, numIntervals, totalOnTime))
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+            #results.append((component_id, current_date, numIntervals, totalOnTime))
 
         return results   
 
@@ -351,6 +329,49 @@ class ComputeSwitchingTime:
 
         return results  
 
+    def computeResults(self, component_id_list):
+        """ compute results
+
+        """    
+        #id = 3776
+        #latitude = -6.118187
+        #longitude = 106.894265
+        #assets = [(3776, -6.118187, 106.894265), (13532, -6.102635, 106.932242)]
+        #assets = [(100280, -6.097081, 106.978368)]
+        #assets = self.getAssetsList()
+        #print(assets)
+        count = 0
+        start_time = datetime.datetime.combine(self.startDate, datetime.time())
+        end_time = datetime.datetime.combine(self.endDate, datetime.time())
+        with open(self.outputFilename, "w") as csvFile:
+            csvWriter = csv.writer(csvFile, delimiter=',')  
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'current_date', 'num_intervals', 'total_on_time')
+            csvWriter.writerow(title_row)     
+            for component_id_tuple in component_id_list:
+                count += 1
+                #only compute for first 500 components
+                #if count > 500:
+                #    break
+                print(count)
+                #results = self.computeOnTime(component_id_tuple)
+                results = self.compute_light_on_time(component_id_tuple, start_time, end_time)
+                #print('len of results: ', len(results))
+                #the results returned is a list of tuples
+                #if len(results) > 0:
+                for record in results:
+                    #csvWriter.writerow(results)
+                    date = record[8]
+                    sunrise_time = self.sunriseTimeDict[date]
+                    sunset_time = self.sunsetTimeDict[date]
+                    daytime_in_min = (sunset_time - sunrise_time).total_seconds() / 60.0
+                    nighttime_in_min = 24 * 60 - daytime_in_min
+                    total_light_on_time = record[10]
+                    if total_light_on_time - nighttime_in_min > 60:
+                        # the difference between total_light_on_time and nighttime_in_min is more than 60 minutes
+                        # this is day-burning record, write to output file
+                        csvWriter.writerow(record)
+                #self.plot(results)    
+
     def run(self):
         """  call this method to run the program
 
@@ -360,7 +381,7 @@ class ComputeSwitchingTime:
         #step 2:  connect to db
         self.connectDB()
         #step 3:  compute sunrise and sunset time 
-        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
+        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get components list
         #component_id_list = [951]
         component_id_list = self.getComponentsList()
@@ -368,6 +389,7 @@ class ComputeSwitchingTime:
         self.computeResults(component_id_list)
         
     def run2(self):
+        # test run
         self.getConfig(self.configFilename)
         self.connectDB()
         
@@ -385,4 +407,4 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = ComputeSwitchingTime(configJSONFilename)    
-    testObj.run2()            
+    testObj.run()            

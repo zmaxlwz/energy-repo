@@ -374,7 +374,7 @@ class ComputeSwitchingTime:
                     #csvWriter.writerow(results)
                     date = record[8]
                     if date not in on_time_dict:
-                        print(record[0])
+                        print(record[0], record[1])
                         print(on_time_dict)
                         continue
                     total_light_on_time = on_time_dict[date]

@@ -71,21 +71,7 @@ class ComputeSwitchingTime:
             #suntime location longitude
             self.suntime_longitude = float(config_data['suntime_location_longitude'])
             
-    def run(self):
-        """  call this method to run the program
-
-        """
-        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
-        self.getConfig(self.configFilename)
-        #step 2:  connect to db
-        self.connectDB()
-        #step 3:  compute sunrise and sunset time 
-        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
-        #step 3:  get components list
-        #component_id_list = [951]
-        component_id_list = self.getComponentsList()
-        #step 4:  call computeResults method
-        self.computeResults(component_id_list)
+    
 
     def getComponentsList(self):
         """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
@@ -164,10 +150,91 @@ class ComputeSwitchingTime:
                         #csvWriter.writerow(results)
                         csvWriter.writerow(record)
                 #self.plot(results)
+
+    def compute_light_on_time(self, component_id, start_time, end_time):
+        """ use switching point table, compute the light on time for the input component from [0:00 - 23:59:59] in UTC
+
+        """
+        #timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
+        #timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
+
+        try:
+            self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
+                              from switching_points \
+                              where component_id = %s \
+                              and timestamp_utc > %s and timestamp_utc < %s  \
+                              order by timestamp_utc", (component_id, start_time, end_time))
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall() 
+
+        if len(rows) == 0:
+            return []
+
+        # the results include tuples in the format of (component_id, date, light_on_time_in_minutes)
+        results = []    
+
+        current_date = None        
+        for row in rows:   
+            # currentTime is in UTC  
+            currentTime = row[1]
+            currentLogValue = row[2]
+            currentIsLogValueOff = row[3]
+            if current_date is None:
+                # it is the first day
+                current_date = currentTime.date()
+                #reset variables for the new date
+                totalOnTime = 0
+                numIntervals = 0
+                switching_on_time = None
+            elif current_date != currentTime.date():
+                # it is a new day
+                if switching_on_time is not None:
+                    # the light is on until the end of day
+                    end_of_day_time = datetime.datetime.combine(current_date, datetime.time(23, 59, 59))
+                    totalOnTime += (end_of_day_time - switching_on_time).total_seconds() / 60.0
+                    numIntervals += 1
+                    switching_on_time = datetime.datetime.combine(currentTime.date(), datetime.time())
+                #first write result
+                if totalOnTime > 0:
+                    #write result
+                    #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+                    results.append((component_id, current_date, numIntervals, totalOnTime))
+                current_date = currentTime.date()
+                #reset variables for the new date
+                totalOnTime = 0
+                numIntervals = 0 
+                #switching_on_time = None      
+
+            if currentIsLogValueOff == False and switching_on_time is None:
+                switching_on_time = currentTime
+            elif currentIsLogValueOff == True and switching_on_time is not None:
+                #1. compute the time length  
+                secondsInterval = (currentTime - switching_on_time).total_seconds()
+                totalOnTime += secondsInterval / 60.0
+                #2. increment the interval count
+                numIntervals += 1
+                #3. set switching_on_time to None
+                switching_on_time = None     
+
+        if switching_on_time is not None:
+            # the light is on until the end of day
+            end_of_day_time = datetime.datetime.combine(current_date, datetime.time(23, 59, 59))
+            totalOnTime += (end_of_day_time - switching_on_time).total_seconds() / 60.0
+            numIntervals += 1
+
+        if totalOnTime > 0:
+            #write result
+            #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+            results.append((component_id, current_date, numIntervals, totalOnTime))
+
+        return results    
                 
     def computeOnTime(self, component_id_tuple):
-        """ using switching point table, compute the switching point turn-on time in minutes from day start
-            this is for Barcelona dataset, turn-on time range is [14:00 - 22:00]
+        """ using switching point table, compute the total on time for the input component during daytime [8:30 - 19:00]
+            use local time, in Sep, Barcelona is +2 hours from UTC
+            this is for Barcelona dataset, daytime range is [8:30 - 19:00]
 
         """
         timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
@@ -187,7 +254,7 @@ class ComputeSwitchingTime:
                               from switching_points \
                               where component_id = %s \
                               and timestamp_utc > %s and timestamp_utc < %s  \
-                              order by timestamp_utc;", (component_id, timeStart, timeEnd))
+                              order by timestamp_utc", (component_id, timeStart, timeEnd))
         except:
             print("I am unable to get data")
 
@@ -243,10 +310,35 @@ class ComputeSwitchingTime:
             #write result
             results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
 
-        return results    
+        return results  
+
+    def run(self):
+        """  call this method to run the program
+
+        """
+        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
+        self.getConfig(self.configFilename)
+        #step 2:  connect to db
+        self.connectDB()
+        #step 3:  compute sunrise and sunset time 
+        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
+        #step 3:  get components list
+        #component_id_list = [951]
+        component_id_list = self.getComponentsList()
+        #step 4:  call computeResults method
+        self.computeResults(component_id_list)
+        
+    def run2(self):
+        self.getConfig(self.configFilename)
+        self.connectDB()
+        component_id = 3209
+        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
+        end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)  
+        results = self.compute_light_on_time(component_id, start_time, end_time)
+        print(results)
 
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = ComputeSwitchingTime(configJSONFilename)    
-    testObj.run()            
+    testObj.run2()            

@@ -201,12 +201,13 @@ class BarcelonaEnergyCheck:
         """
 
         asset_id = asset_tuple[0]
-        latitude = asset_tuple[1]
-        longitude = asset_tuple[2]
-        installation_date = asset_tuple[3]
-        commissioning_date = asset_tuple[4]
-        street_name = asset_tuple[5]
-        cabinet_id = asset_tuple[6]
+        component_id = asset_tuple[1]
+        latitude = asset_tuple[2]
+        longitude = asset_tuple[3]
+        installation_date = asset_tuple[4]
+        commissioning_date = asset_tuple[5]
+        street_name = asset_tuple[6]
+        cabinet_id = asset_tuple[7]
 
         try:
             self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
@@ -279,10 +280,10 @@ class BarcelonaEnergyCheck:
 
         """                
         try:            
-            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
-                              from assets \
-                              where is_deleted = 'f' \
-                              and installation_date is not null and commissioning_date is not null")            
+            self.cur.execute("select c.id, c.asset_id, a.latitude, a.longitude, a.installation_date, a.commissioning_date \
+                              from assets as a, components as c \
+                              where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
+                              and a.id = c.asset_id and c.component_kind = 0")            
         except:
             print("I am unable to get data")
 
@@ -290,11 +291,12 @@ class BarcelonaEnergyCheck:
 
         results = []
         for row in rows:
-            asset_id = row[0]
-            latitude = row[1]
-            longitude = row[2]
-            installation_date = row[3]
-            commissioning_date = row[4]
+            asset_id = row[1]
+            component_id = row[0]
+            latitude = row[2]
+            longitude = row[3]
+            installation_date = row[4]
+            commissioning_date = row[5]
 
             try:
                 self.cur.execute("select s.name as street_name \
@@ -317,7 +319,7 @@ class BarcelonaEnergyCheck:
             cabinet_id_data = self.cur.fetchall()     
             cabinet_id = cabinet_id_data[0][0]
 
-            results.append((asset_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
 
         return results              
 

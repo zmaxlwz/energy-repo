@@ -235,8 +235,9 @@ class BarcelonaEnergyCheck:
                     # compute the mean and std of energy consumption within the rolling window       
                     avg_energy_consumption = statistics.mean(energy_rolling_window)
                     std_energy_consumption = statistics.stdev(energy_rolling_window)
-                    if std_energy_consumption == 0 and dailyEnergyConsumption > avg_energy_consumption:
-                        results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                    if std_energy_consumption == 0:
+                        if dailyEnergyConsumption > avg_energy_consumption:
+                            results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
                     else:    
                         num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
                         #if num_std < -1.5 or num_std > 1.5:

@@ -4,6 +4,7 @@ import psycopg2
 import csv
 import sys
 import json
+import statistics
 
 class ComputeSwitchingTime:
 

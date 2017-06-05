@@ -280,10 +280,16 @@ class BarcelonaEnergyCheck:
 
         """                
         try:            
+            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
+                              from assets \
+                              where is_deleted = 'f' \
+                              and installation_date is not null and commissioning_date is not null")
+            '''
             self.cur.execute("select c.id, c.asset_id, a.latitude, a.longitude, a.installation_date, a.commissioning_date \
                               from assets as a, components as c \
                               where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
-                              and a.id = c.asset_id and c.component_kind = 0")            
+                              and a.id = c.asset_id and c.component_kind = 0")        
+            '''                      
         except:
             print("I am unable to get data")
 
@@ -291,12 +297,22 @@ class BarcelonaEnergyCheck:
 
         results = []
         for row in rows:
-            asset_id = row[1]
-            component_id = row[0]
-            latitude = row[2]
-            longitude = row[3]
-            installation_date = row[4]
-            commissioning_date = row[5]
+            asset_id = row[0]
+            latitude = row[1]
+            longitude = row[2]
+            installation_date = row[3]
+            commissioning_date = row[4]
+
+            try:
+                self.cur.execute("select id \
+                                  from components \
+                                  where asset_id = %s \
+                                  and component_kind = 0", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            component_id_data = self.cur.fetchall() 
+            component_id = component_id_data[0][0]    
 
             try:
                 self.cur.execute("select s.name as street_name \

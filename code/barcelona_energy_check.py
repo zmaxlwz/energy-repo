@@ -235,15 +235,22 @@ class BarcelonaEnergyCheck:
                     # compute the mean and std of energy consumption within the rolling window       
                     avg_energy_consumption = statistics.mean(energy_rolling_window)
                     std_energy_consumption = statistics.stdev(energy_rolling_window)
-                    #num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
+                    if std_energy_consumption == 0 and dailyEnergyConsumption > avg_energy_consumption:
+                        results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                    else:    
+                        num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
+                        #if num_std < -1.5 or num_std > 1.5:
+                        if num_std > 1.5:
+                            results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                    '''
                     energy_deviation = dailyEnergyConsumption - avg_energy_consumption
-                    #if num_std < -1.5 or num_std > 1.5:
                     #if energy_deviation < -0.2 or energy_deviation > 0.2:
                     if energy_deviation > 0.2:    
                         #report this abnormal case
                         #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
-                        #results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
+                        
                         results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, energy_deviation))
+                    '''
                     #update rolling window    
                     energy_rolling_window.pop(0)
                     energy_rolling_window.append(dailyEnergyConsumption)    
@@ -284,8 +291,8 @@ class BarcelonaEnergyCheck:
         """
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
-            #title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')  
-            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'energy_deviation')       
+            title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_of_std')  
+            #title_row = ('asset_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'energy_deviation')       
             csvWriter.writerow(title_row)
             for record in results:
                 csvWriter.writerow(record)
@@ -298,8 +305,8 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2063, 2, 3, 10, 11]
         #asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        asset_id_list = [816]
-        #asset_id_list = self.get_assets_list()
+        #asset_id_list = [816]
+        asset_id_list = self.get_assets_list()
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)

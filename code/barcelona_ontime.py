@@ -229,7 +229,46 @@ class ComputeSwitchingTime:
             #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
             results.append((component_id, current_date, numIntervals, totalOnTime))
 
-        return results    
+        return results   
+
+    def computeDaytimeStartEnd(self, date):
+        """
+
+        return a tuple (daytimeStart, daytimeEnd)
+        both of the two elements are datetime objects
+
+        """
+        dayStartTime = datetime.datetime.combine(date.date(), datetime.time())
+        #compute sunrise time for that date
+        (h, m, s) = self.sun.sunrise(when=date)
+        time_delta = datetime.timedelta(hours=h, minutes=m, seconds=s)
+        sunrise_datetime = dayStartTime + time_delta
+        #print(sunrise_datetime)       
+        #compute sunset time for that date 
+        (h, m, s) = self.sun.sunset(when=date)
+        time_delta = datetime.timedelta(hours=h, minutes=m, seconds=s)
+        sunset_datetime = dayStartTime + time_delta
+        
+        return (sunrise_datetime, sunset_datetime)
+
+    def computeSunTime(self, latitude, longitude, startDate, endDate):
+        """ this method will compute the sunrise and sunset time for each date between [startDate, endDate]
+            based on the given latitude and longitude, and create a dictionary
+            fact: the suntime for each light position in Jakarta will not differ by more than 1.5 minutes
+
+            Args:
+                latitude:  double variable, the latitude of a given light location
+                longitude: double variable, the longitude of a given light location
+                startDate: datetime.date() variable, the start of a time period
+                endDate:   datetime.date() variable, the end of a time period 
+        """    
+        self.sun = sun(lat=latitude, long=longitude)
+        dateTime = datetime.datetime.combine(startDate, datetime.time(hour=8))
+        while dateTime.date() <= endDate:        
+            daytimeStart, daytimeEnd = self.computeDaytimeStartEnd(dateTime)
+            self.sunriseTimeDict[dateTime.date()] = daytimeStart
+            self.sunsetTimeDict[dateTime.date()] = daytimeEnd
+            dateTime += self.oneDayDelta     
                 
     def computeOnTime(self, component_id_tuple):
         """ using switching point table, compute the total on time for the input component during daytime [8:30 - 19:00]
@@ -331,11 +370,16 @@ class ComputeSwitchingTime:
     def run2(self):
         self.getConfig(self.configFilename)
         self.connectDB()
-        component_id = 3209
+        
+        #component_id = 3209
         start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
         end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)  
-        results = self.compute_light_on_time(component_id, start_time, end_time)
-        print(results)
+        #results = self.compute_light_on_time(component_id, start_time, end_time)
+        #print(results)
+        
+        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
+        print(self.sunriseTimeDict)
+        print(self.sunsetTimeDict)
 
 if __name__ == "__main__":
 

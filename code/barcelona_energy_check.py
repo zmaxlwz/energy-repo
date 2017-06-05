@@ -307,7 +307,7 @@ class BarcelonaEnergyCheck:
                 self.cur.execute("select id \
                                   from components \
                                   where asset_id = %s \
-                                  and component_kind = 0", (asset_id, ))
+                                  and is_deleted = 'f' and component_kind = 0", (asset_id, ))
             except:
                 print("I am unable to get data")
 

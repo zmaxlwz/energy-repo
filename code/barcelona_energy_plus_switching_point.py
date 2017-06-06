@@ -186,11 +186,11 @@ class ComputeSwitchingTime:
                     numIntervals += 1
                     switching_on_time = datetime.datetime.combine(currentTime.date(), datetime.time())
                 #first write result
-                if totalOnTime > 0:
-                    #write result
-                    #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-                    results[current_date] = totalOnTime
-                    #results.append((component_id, current_date, numIntervals, totalOnTime))
+                #if totalOnTime > 0:
+                #write result
+                #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+                results[current_date] = totalOnTime
+                #results.append((component_id, current_date, numIntervals, totalOnTime))
                 current_date = currentTime.date()
                 #reset variables for the new date
                 totalOnTime = 0
@@ -214,11 +214,11 @@ class ComputeSwitchingTime:
             totalOnTime += (end_of_day_time - switching_on_time).total_seconds() / 60.0
             numIntervals += 1
 
-        if totalOnTime > 0:
-            #write result
-            #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-            results[current_date] = totalOnTime
-            #results.append((component_id, current_date, numIntervals, totalOnTime))
+        #if totalOnTime > 0:
+        #write result
+        #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
+        results[current_date] = totalOnTime
+        #results.append((component_id, current_date, numIntervals, totalOnTime))
 
         return results   
 
@@ -373,10 +373,12 @@ class ComputeSwitchingTime:
                 for record in results:
                     #csvWriter.writerow(results)
                     date = record[8]
+                    '''
                     if date not in on_time_dict:
                         print(component_id_tuple)
                         print(date)
                         continue
+                    '''    
                     total_light_on_time = on_time_dict[date]
                     sunrise_time = self.sunriseTimeDict[date]
                     sunset_time = self.sunsetTimeDict[date]

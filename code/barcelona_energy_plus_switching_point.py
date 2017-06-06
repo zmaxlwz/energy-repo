@@ -373,6 +373,10 @@ class ComputeSwitchingTime:
                 for record in results:
                     #csvWriter.writerow(results)
                     date = record[8]
+                    if date not in on_time_dict:
+                        print(component_id_tuple)
+                        print(date)
+                        continue
                     total_light_on_time = on_time_dict[date]
                     sunrise_time = self.sunriseTimeDict[date]
                     sunset_time = self.sunsetTimeDict[date]

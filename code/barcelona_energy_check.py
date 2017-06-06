@@ -364,9 +364,11 @@ class BarcelonaEnergyCheck:
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
-        start_time = datetime.datetime(2016, 8, 1, 0, 0, 0)
-        end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)        
-        
+        #start_time = datetime.datetime(2016, 8, 1, 0, 0, 0)
+        #end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)    
+        start_time = datetime.datetime(2017, 1, 1, 0, 0, 0)
+        end_time = datetime.datetime(2017, 4, 1, 0, 0, 0)
+                
         print("total assets: ", len(asset_tuple_list))
         results = []
         count = 0

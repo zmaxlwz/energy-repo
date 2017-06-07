@@ -340,6 +340,7 @@ class DayburnerEnergyOnly:
                 lastEnergy = currentEnergy 
         return results 
 
+
     def compute_actual_wattage(self, asset_id, start_time, end_time):
         """ compute asset's actual wattage according to energy consumption and sunset to sunrise night time
             if the days between start_time and end_time are more than 30 days, use the first 30 days' energy consumption
@@ -359,8 +360,36 @@ class DayburnerEnergyOnly:
 
         rows = self.cur.fetchall()
 
+        energy_rolling_window = []
+        lastTime = None
+        lastDate = None
+        lastEnergy = None
         for row in rows:
-            print(row[0], row[1], row[2])
+            if lastDate is None:
+                # it is the first date
+                lastTime = row[2]
+                lastDate = lastTime.date()
+                lastEnergy = row[1]
+            elif row[2].date() != lastDate:
+                # it is a new date
+                currentTime = row[2]
+                currentDate = currentTime.date()
+                currentEnergy = row[1] 
+                energyConsumption = currentEnergy - lastEnergy
+                num_days = (currentDate - lastDate).days
+                dailyEnergyConsumption = energyConsumption / num_days
+                #print(lastTime, dailyEnergyConsumption)
+                energy_rolling_window.append(dailyEnergyConsumption) 
+                if len(energy_rolling_window) >= 30:
+                    # the rolling window is full
+                    break   
+                #update record
+                lastTime = currentTime    
+                lastDate = currentDate
+                lastEnergy = currentEnergy 
+
+        print(energy_rolling_window)
+        print(currentDate)
 
         
                 
@@ -435,7 +464,7 @@ class DayburnerEnergyOnly:
         self.connectDB()
         
         #component_id = 3209
-        start_time = datetime.datetime(2016, 9, 9, 0, 0, 0)
+        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
         end_time = datetime.datetime(2016, 9, 25, 0, 0, 0)  
         #results = self.compute_light_on_time(component_id, start_time, end_time)
         #print(results)

@@ -377,7 +377,7 @@ class DayburnerEnergyOnly:
                 currentEnergy = row[1] 
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
-                dailyEnergyConsumption = energyConsumption / num_days
+                dailyEnergyConsumption = round(energyConsumption / num_days, 1)
                 #print(lastTime, dailyEnergyConsumption)
                 energy_rolling_window.append(dailyEnergyConsumption) 
                 if len(energy_rolling_window) >= 30:

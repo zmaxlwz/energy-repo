@@ -5,6 +5,7 @@ import csv
 import sys
 import json
 import statistics
+from collections import Counter
 
 class DayburnerEnergyOnly:
 
@@ -388,10 +389,20 @@ class DayburnerEnergyOnly:
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
 
-        print(energy_rolling_window)
+        #print(energy_rolling_window)
+        print(self.get_most_frequent_value(energy_rolling_window))
         print(currentDate)
 
-        
+    def get_most_frequent_value(self, energy_rolling_window):
+        """ get the most frequent value from the input energy_rolling_window
+            and assume it is the normal daily energy consumption value
+
+        """
+        # get the count for each value in energy_rolling_window
+        counter = Counter(energy_rolling_window)   
+        result = counter.most_common(1)
+        most_frequent_value = result[0][0]
+        return most_frequent_value
                 
     def computeResults(self, component_id_list):
         """ compute results

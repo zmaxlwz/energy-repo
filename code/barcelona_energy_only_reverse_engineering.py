@@ -72,9 +72,7 @@ class DayburnerEnergyOnly:
             self.suntime_latitude = float(config_data['suntime_location_latitude'])
             #suntime location longitude
             self.suntime_longitude = float(config_data['suntime_location_longitude'])
-            
-    
-
+         
     def getComponentsList(self):
         """ get assets list from assets table, which are not deleted and installation_date and commissioning_date are not null
 
@@ -130,98 +128,7 @@ class DayburnerEnergyOnly:
 
             results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
 
-        return results
-
-    def compute_light_on_time(self, component_id_tuple, start_time, end_time):
-        """ use switching point table, compute the light on time for the input component from [0:00 - 23:59:59] in UTC
-
-        """
-        #timeStart = datetime.datetime.combine(self.startDate, datetime.time(hour=6))
-        #timeEnd = datetime.datetime.combine(self.endDate, datetime.time(hour=23))
-
-        asset_id = component_id_tuple[0]
-        component_id = component_id_tuple[1]
-        latitude = component_id_tuple[2]
-        longitude = component_id_tuple[3]
-        installation_date = component_id_tuple[4]
-        commissioning_date = component_id_tuple[5]
-        street_name = component_id_tuple[6]
-        cabinet_id = component_id_tuple[7]
-
-        try:
-            self.cur.execute("select component_id, timestamp_utc, log_value, is_log_value_off \
-                              from switching_points \
-                              where component_id = %s \
-                              and timestamp_utc > %s and timestamp_utc < %s  \
-                              order by timestamp_utc", (component_id, start_time, end_time))
-        except:
-            print("I am unable to get data")
-
-        rows = self.cur.fetchall() 
-
-        if len(rows) == 0:
-            return {}
-
-        # the results include tuples in the format of (component_id, date, light_on_time_in_minutes)
-        results = {}
-
-        current_date = None        
-        for row in rows:   
-            # currentTime is in UTC  
-            currentTime = row[1]
-            currentLogValue = row[2]
-            currentIsLogValueOff = row[3]
-            if current_date is None:
-                # it is the first day
-                current_date = currentTime.date()
-                #reset variables for the new date
-                totalOnTime = 0
-                numIntervals = 0
-                switching_on_time = None
-            elif current_date != currentTime.date():
-                # it is a new day
-                if switching_on_time is not None:
-                    # the light is on until the end of day
-                    end_of_day_time = datetime.datetime.combine(current_date, datetime.time(23, 59, 59))
-                    totalOnTime += (end_of_day_time - switching_on_time).total_seconds() / 60.0
-                    numIntervals += 1
-                    switching_on_time = datetime.datetime.combine(currentTime.date(), datetime.time())
-                #first write result
-                #if totalOnTime > 0:
-                #write result
-                #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-                results[current_date] = totalOnTime
-                #results.append((component_id, current_date, numIntervals, totalOnTime))
-                current_date = currentTime.date()
-                #reset variables for the new date
-                totalOnTime = 0
-                numIntervals = 0 
-                #switching_on_time = None      
-
-            if currentIsLogValueOff == False and switching_on_time is None:
-                switching_on_time = currentTime
-            elif currentIsLogValueOff == True and switching_on_time is not None:
-                #1. compute the time length  
-                secondsInterval = (currentTime - switching_on_time).total_seconds()
-                totalOnTime += secondsInterval / 60.0
-                #2. increment the interval count
-                numIntervals += 1
-                #3. set switching_on_time to None
-                switching_on_time = None     
-
-        if switching_on_time is not None:
-            # the light is on until the end of day
-            end_of_day_time = datetime.datetime.combine(current_date, datetime.time(23, 59, 59))
-            totalOnTime += (end_of_day_time - switching_on_time).total_seconds() / 60.0
-            numIntervals += 1
-
-        #if totalOnTime > 0:
-        #write result
-        #results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, current_date, numIntervals, totalOnTime)) 
-        results[current_date] = totalOnTime
-        #results.append((component_id, current_date, numIntervals, totalOnTime))
-
-        return results   
+        return results  
 
     def computeDaytimeStartEnd(self, date):
         """
@@ -262,7 +169,7 @@ class DayburnerEnergyOnly:
             self.sunsetTimeDict[dateTime.date()] = daytimeEnd
             dateTime += self.oneDayDelta     
 
-    def find_dayburners_energy_deviation_rolling_window_avg(self, asset_tuple, start_time, end_time):
+    def find_dayburners_energy_with_actual_wattage(self, asset_tuple, actual_wattage, start_time, end_time):
         """ find dayburners by calculating energy deviation from 30 day rolling window average 
             if # of stdev > 1.5 and deviation > 0.2 kwh, report that record
         """
@@ -287,7 +194,6 @@ class DayburnerEnergyOnly:
 
         rows = self.cur.fetchall()
 
-        energy_rolling_window = []
         results = []
         lastTime = None
         lastDate = None
@@ -306,35 +212,25 @@ class DayburnerEnergyOnly:
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
                 dailyEnergyConsumption = energyConsumption / num_days
-                #print(lastTime, dailyEnergyConsumption)
-                if len(energy_rolling_window) == 30:
-                    # the rolling window is full
-                    # compute the mean and std of energy consumption within the rolling window       
-                    avg_energy_consumption = statistics.mean(energy_rolling_window)
-                    std_energy_consumption = statistics.stdev(energy_rolling_window)
-                    if std_energy_consumption == 0:
-                        if dailyEnergyConsumption - avg_energy_consumption > 0.2:
-                            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, None))
-                    else:    
-                        num_std = (dailyEnergyConsumption - avg_energy_consumption) / std_energy_consumption
-                        #if num_std < -1.5 or num_std > 1.5:
-                        if num_std > 1.5 and dailyEnergyConsumption - avg_energy_consumption > 0.2:
-                            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, std_energy_consumption, num_std))
-                    '''
-                    energy_deviation = dailyEnergyConsumption - avg_energy_consumption
-                    #if energy_deviation < -0.2 or energy_deviation > 0.2:
-                    if energy_deviation > 0.2:    
-                        #report this abnormal case
-                        #print('{0} {1:5.1f} {2: 5.4f} {3} {4:5.1f} {5} {6:5.1f}'.format(asset_id, dailyEnergyConsumption, num_std, lastDate, lastEnergy, currentDate, currentEnergy))
-                        
-                        results.append((asset_id, lastDate, dailyEnergyConsumption, avg_energy_consumption, energy_deviation))
-                    '''
-                    #update rolling window    
-                    energy_rolling_window.pop(0)
-                    energy_rolling_window.append(dailyEnergyConsumption)    
-                else:
-                    # the rolling window is not full, just append new element to the end of the rolling window
-                    energy_rolling_window.append(dailyEnergyConsumption)    
+
+                # use actual wattage to compute the on time in minutes
+                actual_on_time_in_min = (dailyEnergyConsumption * 1000 / actual_wattage) * 60.0
+
+                # compute the night time using sunset and sunrise time and normal energy consumption
+                sunrise_time = self.sunriseTimeDict[lastDate]
+                sunset_time = self.sunsetTimeDict[lastDate]
+                daytime_in_min = (sunset_time - sunrise_time).total_seconds() / 60.0
+                nighttime_in_min = 24 * 60 - daytime_in_min
+
+                normal_energy_consumption = (actual_wattage * nighttime_in_min / 60.0) / 1000.0 
+
+                # compute the difference between computed on time and night time,  
+                # also the actual energy consumption and normal energy consumption
+                # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh
+                if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+                    # report the record
+                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, actual_wattage, lastDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
+   
                 #update record
                 lastTime = currentTime    
                 lastDate = currentDate
@@ -342,13 +238,15 @@ class DayburnerEnergyOnly:
         return results 
 
 
-    def compute_actual_wattage(self, asset_id, start_time, end_time):
+    def compute_actual_wattage(self, asset_tuple, start_time, end_time):
         """ compute asset's actual wattage according to energy consumption and sunset to sunrise night time
             if the days between start_time and end_time are more than 30 days, use the first 30 days' energy consumption
             if the days are fewer than 30 days, use all days' energy consumption
             get the most frequent energy consumption as the normal energy consumption and use the sunset to sunrise time to compute wattage
 
         """
+
+        asset_id = asset_tuple[0]
 
         try:
             self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
@@ -430,7 +328,7 @@ class DayburnerEnergyOnly:
         end_time = datetime.datetime.combine(self.endDate, datetime.time())
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'current_date', 'dailyEnergyConsumption', 'avg_energy_consumption', 'std_energy_consumption', 'num_std')
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'actual_wattage', 'current_date', 'dailyEnergyConsumption', 'normal_energy_consumption', 'actual_on_time_in_min', 'nighttime_in_min')
             csvWriter.writerow(title_row)     
             for component_id_tuple in component_id_list:
                 count += 1
@@ -438,30 +336,14 @@ class DayburnerEnergyOnly:
                 #if count > 500:
                 #    break
                 print(count)
-                results = self.find_dayburners_energy_deviation_rolling_window_avg(component_id_tuple, start_time, end_time)
-                on_time_dict = self.compute_light_on_time(component_id_tuple, start_time, end_time)
+                actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
+                results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)
+                
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 #if len(results) > 0:
                 for record in results:
-                    #csvWriter.writerow(results)
-                    date = record[8]
-                    '''
-                    if date not in on_time_dict:
-                        print(component_id_tuple)
-                        print(date)
-                        continue
-                    '''    
-                    total_light_on_time = on_time_dict[date]
-                    sunrise_time = self.sunriseTimeDict[date]
-                    sunset_time = self.sunsetTimeDict[date]
-                    daytime_in_min = (sunset_time - sunrise_time).total_seconds() / 60.0
-                    nighttime_in_min = 24 * 60 - daytime_in_min
-                    if total_light_on_time - nighttime_in_min > 60:
-                        # the difference between total_light_on_time and nighttime_in_min is more than 60 minutes
-                        # this is day-burning record, write to output file
-                        csvWriter.writerow(record)
-                #self.plot(results)    
+                    csvWriter.writerow(record)    
 
     def run(self):
         """  call this method to run the program
@@ -503,5 +385,5 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = DayburnerEnergyOnly(configJSONFilename)    
-    testObj.run2()            
+    testObj.run()            
 

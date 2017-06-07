@@ -340,7 +340,7 @@ class DayburnerEnergyOnly:
                 #if count > 500:
                 #    break
                 print(count)
-                #print(component_id_tuple)
+                print(component_id_tuple)
                 actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
                 if actual_wattage is None:
                     continue

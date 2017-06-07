@@ -290,6 +290,8 @@ class DayburnerEnergyOnly:
         #print(energy_rolling_window)
         #print(self.get_most_frequent_value(energy_rolling_window))
         #print(currentDate)
+
+        energy_rolling_window = [x for x in energy_rolling_window if x != 0]
         if len(energy_rolling_window) == 0:
             return None
 

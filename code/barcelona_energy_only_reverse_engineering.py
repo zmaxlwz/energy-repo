@@ -290,6 +290,9 @@ class DayburnerEnergyOnly:
         #print(energy_rolling_window)
         #print(self.get_most_frequent_value(energy_rolling_window))
         #print(currentDate)
+        if len(energy_rolling_window) == 0:
+            return None
+
         normal_energy_consumption = self.get_most_frequent_value(energy_rolling_window)
         sunrise_time = self.sunriseTimeDict[currentDate]
         sunset_time = self.sunsetTimeDict[currentDate]
@@ -337,10 +340,12 @@ class DayburnerEnergyOnly:
                 #if count > 500:
                 #    break
                 print(count)
-                print(component_id_tuple)
+                #print(component_id_tuple)
                 actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
-                results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)
-                
+                if actual_wattage is None:
+                    continue
+
+                results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)                
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 #if len(results) > 0:

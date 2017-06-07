@@ -6,7 +6,7 @@ import sys
 import json
 import statistics
 
-class DayburnerEnergyPlusSwitchingPoint:
+class DayburnerEnergyOnly:
 
     def __init__(self, configJSONFilename):
         """ initialize variables
@@ -339,6 +339,29 @@ class DayburnerEnergyPlusSwitchingPoint:
                 lastDate = currentDate
                 lastEnergy = currentEnergy 
         return results 
+
+    def compute_actual_wattage(self, asset_id, start_time, end_time):
+        """ compute asset's actual wattage according to energy consumption and sunset to sunrise night time
+            if the days between start_time and end_time are more than 30 days, use the first 30 days' energy consumption
+            if the days are fewer than 30 days, use all days' energy consumption
+            get the most frequent energy consumption as the normal energy consumption and use the sunset to sunrise time to compute wattage
+
+        """
+
+        try:
+            self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
+                              from energy_metering_points b, energy_meter_readings a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.timestamp_utc >= %s and a.timestamp_utc < %s \
+                              order by b.asset_id, a.timestamp_utc", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        for row in rows:
+            print(row[0], row[1], row[2])
+
         
                 
     def computeResults(self, component_id_list):
@@ -408,21 +431,28 @@ class DayburnerEnergyPlusSwitchingPoint:
         
     def run2(self):
         # test run
-        self.getConfig(self.configFilename)
-        self.connectDB()
+        #self.getConfig(self.configFilename)
+        #self.connectDB()
         
         #component_id = 3209
-        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
-        end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)  
+        start_time = datetime.datetime(2016, 9, 9, 0, 0, 0)
+        end_time = datetime.datetime(2016, 9, 25, 0, 0, 0)  
         #results = self.compute_light_on_time(component_id, start_time, end_time)
         #print(results)
         
-        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
-        print(self.sunriseTimeDict)
-        print(self.sunsetTimeDict)
+        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
+        #print(self.sunriseTimeDict)
+        #print(self.sunsetTimeDict)
+
+        asset_id = 2140
+
+        self.compute_actual_wattage(asset_id, start_time, end_time)
+
+
 
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
-    testObj = DayburnerEnergyPlusSwitchingPoint(configJSONFilename)    
-    testObj.run()            
+    testObj = DayburnerEnergyOnly(configJSONFilename)    
+    testObj.run2()            
+

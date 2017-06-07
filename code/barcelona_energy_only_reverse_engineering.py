@@ -307,6 +307,7 @@ class DayburnerEnergyOnly:
 
         """
         # get the count for each value in energy_rolling_window
+        print(energy_rolling_window)
         counter = Counter(energy_rolling_window)   
         result = counter.most_common(1)
         most_frequent_value = result[0][0]
@@ -336,6 +337,7 @@ class DayburnerEnergyOnly:
                 #if count > 500:
                 #    break
                 print(count)
+                print(component_id_tuple)
                 actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
                 results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)
                 

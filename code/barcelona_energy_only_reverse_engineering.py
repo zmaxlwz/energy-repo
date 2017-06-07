@@ -431,8 +431,8 @@ class DayburnerEnergyOnly:
         
     def run2(self):
         # test run
-        #self.getConfig(self.configFilename)
-        #self.connectDB()
+        self.getConfig(self.configFilename)
+        self.connectDB()
         
         #component_id = 3209
         start_time = datetime.datetime(2016, 9, 9, 0, 0, 0)

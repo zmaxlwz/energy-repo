@@ -390,8 +390,18 @@ class DayburnerEnergyOnly:
                 lastEnergy = currentEnergy 
 
         #print(energy_rolling_window)
-        print(self.get_most_frequent_value(energy_rolling_window))
-        print(currentDate)
+        #print(self.get_most_frequent_value(energy_rolling_window))
+        #print(currentDate)
+        normal_energy_consumption = self.get_most_frequent_value(energy_rolling_window)
+        sunrise_time = self.sunriseTimeDict[currentDate]
+        sunset_time = self.sunsetTimeDict[currentDate]
+        daytime_in_hours = (sunset_time - sunrise_time).total_seconds() / 60.0 / 60.0
+        nighttime_in_hours = 24 - daytime_in_hours
+        
+        # compute the actual wattage for the asset in watts
+        actual_wattage = (normal_energy_consumption / nighttime_in_hours) * 1000
+
+        return actual_wattage 
 
     def get_most_frequent_value(self, energy_rolling_window):
         """ get the most frequent value from the input energy_rolling_window
@@ -480,15 +490,14 @@ class DayburnerEnergyOnly:
         #results = self.compute_light_on_time(component_id, start_time, end_time)
         #print(results)
         
-        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
+        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
         #print(self.sunriseTimeDict)
         #print(self.sunsetTimeDict)
 
         asset_id = 2140
 
-        self.compute_actual_wattage(asset_id, start_time, end_time)
-
-
+        actual_wattage = self.compute_actual_wattage(asset_id, start_time, end_time)
+        print(actual_wattage)
 
 if __name__ == "__main__":
 

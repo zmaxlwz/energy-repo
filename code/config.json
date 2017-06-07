@@ -7,7 +7,7 @@
         "output_csvfile_name": "result21.csv",
         "energy_threshold": "5",
         "onTime_threshold": "0",
-        "period_start_date": "1/1/2017",
+        "period_start_date": "2/1/2017",
         "period_end_date": "4/1/2017",
         "commissioning_date_plus_days": "3",
         "nominal_wattage_ratio": "0.1",

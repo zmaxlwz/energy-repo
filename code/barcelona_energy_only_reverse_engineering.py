@@ -418,6 +418,43 @@ class DayburnerEnergyOnly:
                 for record in results:
                     csvWriter.writerow(record)    
 
+    def find_actual_wattage_greater_than_nominal_wattage(self, component_id_list):
+        """ report the assets where computed actual wattage is greater than the nominal wattage
+
+        """
+        count = 0
+        start_time = datetime.datetime.combine(self.startDate, datetime.time())
+        end_time = datetime.datetime.combine(self.endDate, datetime.time())
+        with open(self.outputFilename, "w") as csvFile:
+            csvWriter = csv.writer(csvFile, delimiter=',')  
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'nominal_wattage', 'actual_wattage')
+            csvWriter.writerow(title_row)     
+            for component_id_tuple in component_id_list:
+                count += 1
+                #only compute for first 500 components
+                #if count > 500:
+                #    break
+                print(count)
+                #print(component_id_tuple)
+                actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
+                if actual_wattage is None:
+                    continue
+
+                asset_id = component_id_tuple[0]
+                component_id = component_id_tuple[1]
+                latitude = component_id_tuple[2]
+                longitude = component_id_tuple[3]
+                installation_date = component_id_tuple[4]
+                commissioning_date = component_id_tuple[5]
+                street_name = component_id_tuple[6]
+                cabinet_id = component_id_tuple[7]
+                nominal_wattage = component_id_tuple[8]         
+                
+                if actual_wattage > nominal_wattage:
+                    csvWriter.writerow((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage)) 
+
+                
+
     def run(self):
         """  call this method to run the program
 
@@ -440,23 +477,28 @@ class DayburnerEnergyOnly:
         self.connectDB()
         
         #component_id = 3209
-        start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
-        end_time = datetime.datetime(2016, 9, 25, 0, 0, 0)  
+        #start_time = datetime.datetime(2016, 9, 1, 0, 0, 0)
+        #end_time = datetime.datetime(2016, 9, 25, 0, 0, 0)  
         #results = self.compute_light_on_time(component_id, start_time, end_time)
         #print(results)
         
-        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
+        #self.computeSunTime(self.suntime_latitude, self.suntime_longitude, start_time.date(), end_time.date())
         #print(self.sunriseTimeDict)
         #print(self.sunsetTimeDict)
 
-        asset_id = 2140
+        #asset_id = 2140
 
-        actual_wattage = self.compute_actual_wattage(asset_id, start_time, end_time)
-        print(actual_wattage)
+        #actual_wattage = self.compute_actual_wattage(asset_id, start_time, end_time)
+        #print(actual_wattage)
+
+        self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
+        component_id_list = self.getComponentsList()
+        self.find_actual_wattage_greater_than_nominal_wattage(component_id_list)
+
 
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = DayburnerEnergyOnly(configJSONFilename)    
-    testObj.run()            
+    testObj.run2()            
 

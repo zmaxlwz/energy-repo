@@ -126,7 +126,17 @@ class DayburnerEnergyOnly:
             cabinet_id_data = self.cur.fetchall()     
             cabinet_id = cabinet_id_data[0][0]
 
-            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id))
+            try:
+                self.cur.execute("select c.asset_id, lt.type_designation, lt.actual_wattage \
+                                  from luminaire_types lt, luminaires l, components c \
+                                  where c.asset_id = %s and c.id = l.id and l.luminaire_type_id = lt.id", (asset_id, ))
+            except:
+                print("I am unable to get data")
+
+            nominal_wattage_data = self.cur.fetchall()     
+            nominal_wattage = nominal_wattage_data[0][2]
+
+            results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage))
 
         return results  
 
@@ -181,6 +191,7 @@ class DayburnerEnergyOnly:
         commissioning_date = asset_tuple[5]
         street_name = asset_tuple[6]
         cabinet_id = asset_tuple[7]
+        nominal_wattage = asset_tuple[8]
 
         try:
             self.cur.execute("select b.asset_id, a.kwh, a.timestamp_utc \
@@ -226,9 +237,9 @@ class DayburnerEnergyOnly:
                 # compute the difference between computed on time and night time,  
                 # also the actual energy consumption and normal energy consumption
                 # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
-                if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+                if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.2:
                     # report the record
-                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, actual_wattage, lastDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
+                    results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage, lastDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
    
                 #update record
                 lastTime = currentTime    
@@ -249,6 +260,7 @@ class DayburnerEnergyOnly:
         commissioning_date = asset_tuple[5]
         street_name = asset_tuple[6]
         cabinet_id = asset_tuple[7]
+        nominal_wattage = asset_tuple[8]
 
         try:
             self.cur.execute("select b.asset_id, a.interpolated_kwh, a.measured_kwh, a.aggregation_time \
@@ -283,9 +295,9 @@ class DayburnerEnergyOnly:
             # compute the difference between computed on time and night time,  
             # also the actual energy consumption and normal energy consumption
             # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
-            if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+            if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.2:
                 # report the record
-                results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, actual_wattage, currentDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
+                results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage, currentDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
 
         return results
 
@@ -385,7 +397,7 @@ class DayburnerEnergyOnly:
         end_time = datetime.datetime.combine(self.endDate, datetime.time())
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')  
-            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'actual_wattage', 'current_date', 'dailyEnergyConsumption', 'normal_energy_consumption', 'actual_on_time_in_min', 'nighttime_in_min')
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'nominal_wattage', 'actual_wattage', 'current_date', 'dailyEnergyConsumption', 'normal_energy_consumption', 'actual_on_time_in_min', 'nighttime_in_min')
             csvWriter.writerow(title_row)     
             for component_id_tuple in component_id_list:
                 count += 1

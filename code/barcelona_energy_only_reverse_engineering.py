@@ -369,6 +369,51 @@ class DayburnerEnergyOnly:
 
         return actual_wattage 
 
+    def compute_actual_wattage_from_aggregation_energy(self, asset_tuple, start_time, end_time):
+        """ similar to the above method, but use aggregation energy table 
+            use the average of the top two most frequent energy consumption to compute the actual wattage
+
+        """
+        asset_id = asset_tuple[0]
+
+        try:
+            self.cur.execute("select b.asset_id, a.interpolated_kwh, a.measured_kwh, a.aggregation_time \
+                              from energy_metering_points b, energy_aggregation_daily a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.aggregation_time >= %s and a.aggregation_time < %s \
+                              order by b.asset_id, a.aggregation_time", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        energy_rolling_window = []
+        for row in rows:
+            currentTime = row[3]
+            currentDate = currentTime.date()
+            interpolated_kwh = row[1]
+            measured_kwh = row[2]
+            dailyEnergyConsumption = round(interpolated_kwh + measured_kwh, 1)
+            energy_rolling_window.append(dailyEnergyConsumption) 
+            if len(energy_rolling_window) >= 30:
+                # the rolling window is full
+                break
+
+        energy_rolling_window = [x for x in energy_rolling_window if x != 0]
+        if len(energy_rolling_window) == 0:
+            return None      
+
+        normal_energy_consumption = self.get_avg_top2_most_frequent_value(energy_rolling_window)
+        sunrise_time = self.sunriseTimeDict[currentDate]
+        sunset_time = self.sunsetTimeDict[currentDate]
+        daytime_in_hours = (sunset_time - sunrise_time).total_seconds() / 60.0 / 60.0
+        nighttime_in_hours = 24 - daytime_in_hours
+        
+        # compute the actual wattage for the asset in watts
+        actual_wattage = (normal_energy_consumption / nighttime_in_hours) * 1000
+
+        return actual_wattage      
+
     def get_most_frequent_value(self, energy_rolling_window):
         """ get the most frequent value from the input energy_rolling_window
             and assume it is the normal daily energy consumption value
@@ -380,6 +425,20 @@ class DayburnerEnergyOnly:
         result = counter.most_common(1)
         most_frequent_value = result[0][0]
         return most_frequent_value
+
+    def get_avg_top2_most_frequent_value(self, energy_rolling_window):
+        """ get the average of the top 2 most frequent values from the input energy_rolling_window
+            if there is only one value returned (all values in the energy_rolling_window are the same), just return that value
+
+        """
+        counter = Counter(energy_rolling_window)   
+        result = counter.most_common(2)
+        if len(result) == 1:
+            return result[0][0]
+        else:
+            top1_value = result[0][0]
+            top2_value = result[1][0]    
+            return (top1_value + top2_value) / 2.0
                 
     def computeResults(self, component_id_list):
         """ compute results
@@ -436,7 +495,7 @@ class DayburnerEnergyOnly:
                 #    break
                 print(count)
                 #print(component_id_tuple)
-                actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
+                actual_wattage = self.compute_actual_wattage_from_aggregation_energy(component_id_tuple, start_time, end_time)
                 if actual_wattage is None:
                     continue
 

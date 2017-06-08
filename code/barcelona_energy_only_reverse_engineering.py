@@ -170,8 +170,7 @@ class DayburnerEnergyOnly:
             dateTime += self.oneDayDelta     
 
     def find_dayburners_energy_with_actual_wattage(self, asset_tuple, actual_wattage, start_time, end_time):
-        """ find dayburners by calculating energy deviation from 30 day rolling window average 
-            if # of stdev > 1.5 and deviation > 0.2 kwh, report that record
+        """ find dayburners by use actual wattage, which is computed by reverse engineering
         """
 
         asset_id = asset_tuple[0]
@@ -226,7 +225,7 @@ class DayburnerEnergyOnly:
 
                 # compute the difference between computed on time and night time,  
                 # also the actual energy consumption and normal energy consumption
-                # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh
+                # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
                 if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
                     # report the record
                     results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, actual_wattage, lastDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
@@ -237,6 +236,58 @@ class DayburnerEnergyOnly:
                 lastEnergy = currentEnergy 
         return results 
 
+
+    def find_dayburners_aggregation_energy_with_actual_wattage(self, asset_tuple, actual_wattage, start_time, end_time):
+        """ use energy_aggregation_daily table to get daily energy consumption, which is measured_kwh + interpolated_kwh
+
+        """
+        asset_id = asset_tuple[0]
+        component_id = asset_tuple[1]
+        latitude = asset_tuple[2]
+        longitude = asset_tuple[3]
+        installation_date = asset_tuple[4]
+        commissioning_date = asset_tuple[5]
+        street_name = asset_tuple[6]
+        cabinet_id = asset_tuple[7]
+
+        try:
+            self.cur.execute("select b.asset_id, a.interpolated_kwh, a.measured_kwh, a.aggregation_time \
+                              from energy_metering_points b, energy_aggregation_daily a \
+                              where b.asset_id = %s and b.id = a.metering_point_id \
+                              and a.aggregation_time >= %s and a.aggregation_time < %s \
+                              order by b.asset_id, a.aggregation_time", (asset_id, start_time, end_time))
+        except:
+            print("I am unable to get data")        
+
+        rows = self.cur.fetchall()
+
+        results = []
+
+        for row in rows:
+            currentTime = row[3]
+            currentDate = currentTime.date()
+            interpolated_kwh = row[1]
+            measured_kwh = row[2]
+            dailyEnergyConsumption = interpolated_kwh + measured_kwh
+            # use actual wattage to compute the on time in minutes
+            actual_on_time_in_min = (dailyEnergyConsumption * 1000 / actual_wattage) * 60.0
+
+            # compute the night time using sunset and sunrise time and normal energy consumption
+            sunrise_time = self.sunriseTimeDict[currentDate]
+            sunset_time = self.sunsetTimeDict[currentDate]
+            daytime_in_min = (sunset_time - sunrise_time).total_seconds() / 60.0
+            nighttime_in_min = 24 * 60 - daytime_in_min
+
+            normal_energy_consumption = (actual_wattage * nighttime_in_min / 60.0) / 1000.0 
+
+            # compute the difference between computed on time and night time,  
+            # also the actual energy consumption and normal energy consumption
+            # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
+            if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+                # report the record
+                results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, actual_wattage, currentDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
+
+        return results
 
     def compute_actual_wattage(self, asset_tuple, start_time, end_time):
         """ compute asset's actual wattage according to energy consumption and sunset to sunrise night time
@@ -347,7 +398,8 @@ class DayburnerEnergyOnly:
                 if actual_wattage is None:
                     continue
 
-                results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)                
+                #results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)             
+                results = self.find_dayburners_aggregation_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)                
                 #print('len of results: ', len(results))
                 #the results returned is a list of tuples
                 #if len(results) > 0:

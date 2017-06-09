@@ -465,7 +465,8 @@ class DayburnerEnergyOnly:
                 #    break
                 print(count)
                 #print(component_id_tuple)
-                actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
+                #actual_wattage = self.compute_actual_wattage(component_id_tuple, start_time, end_time)
+                actual_wattage = self.compute_actual_wattage_from_aggregation_energy(component_id_tuple, start_time, end_time)
                 if actual_wattage is None:
                     continue
 
@@ -511,8 +512,7 @@ class DayburnerEnergyOnly:
                 
                 if actual_wattage > nominal_wattage:
                     csvWriter.writerow((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage)) 
-
-                
+ 
 
     def run(self):
         """  call this method to run the program
@@ -559,5 +559,5 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = DayburnerEnergyOnly(configJSONFilename)    
-    testObj.run2()            
+    testObj.run()            
 

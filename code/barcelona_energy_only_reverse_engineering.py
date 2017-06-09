@@ -237,7 +237,7 @@ class DayburnerEnergyOnly:
                 # compute the difference between computed on time and night time,  
                 # also the actual energy consumption and normal energy consumption
                 # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
-                if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+                if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.2:
                     # report the record
                     results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage, lastDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
    
@@ -295,7 +295,7 @@ class DayburnerEnergyOnly:
             # compute the difference between computed on time and night time,  
             # also the actual energy consumption and normal energy consumption
             # if the time difference is more than 1 hour and energy difference is more than 0.1 kwh, report
-            if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.1:
+            if actual_on_time_in_min - nighttime_in_min > 60 and dailyEnergyConsumption - normal_energy_consumption > 0.2:
                 # report the record
                 results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage, currentDate, dailyEnergyConsumption, normal_energy_consumption, actual_on_time_in_min, nighttime_in_min))
 

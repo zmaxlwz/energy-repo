@@ -106,9 +106,15 @@ class Calendar_XML_Analyzer:
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
-    asset_id = sys.argv[2]
-    analyzer = Calendar_XML_Analyzer(configJSONFilename)    
-    calendar_xml_str = analyzer.get_xml_with_asset_id(asset_id)    
-    analyzer.parse_calendar_xml(calendar_xml_str)       
+    analyzer = Calendar_XML_Analyzer(configJSONFilename)
 
+    # get the calendar for the input asset id
+    #asset_id = sys.argv[2]        
+    #calendar_xml_str = analyzer.get_xml_with_asset_id(asset_id)    
+    
+    # get the calendar for the input calendar id
+    calendar_id = sys.argv[2]
+    calendar_xml_str = analyzer.get_xml_with_calendar_id(calendar_id)
+
+    analyzer.parse_calendar_xml(calendar_xml_str)  
 

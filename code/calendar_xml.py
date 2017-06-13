@@ -83,7 +83,7 @@ class Calendar_XML_Analyzer:
                 self.cur.execute("select serialized_schedules \
                                   from driver_calendar_revisions \
                                   where core_calendar_id = %s \
-                                  order by created_on_utc desc", (dimming_calendar_id,))
+                                  order by created_on_utc desc", (calendar_id,))
         except:
                 print("I am unable to get data")
 

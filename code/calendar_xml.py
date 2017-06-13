@@ -5,14 +5,17 @@ from xml_parser import XML_Parser
 
 class Calendar_XML_Analyzer:
 
-    def __init__(self, configJSONFilename, asset_id):
+    def __init__(self, configJSONFilename):
         """ initialize variables
 
         """
         #configuration file name
         self.configFilename = configJSONFilename
-        #the asset id to check
-        self.asset_id = asset_id
+
+        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
+        self.getConfig(self.configFilename)
+        #step 2:  connect to db
+        self.connectDB()
         
     def connectDB(self):
         """ build connection to the database
@@ -43,7 +46,7 @@ class Calendar_XML_Analyzer:
             self.pg_host = config_data['pg_host']
             self.pg_port = config_data['pg_port']
 
-    def getCalendarXML(self, asset_id):
+    def get_xml_with_asset_id(self, asset_id):
         """ get the last calendar revision XML for the input asset
 
         """
@@ -69,6 +72,12 @@ class Calendar_XML_Analyzer:
         rows = self.cur.fetchall()
         dimming_calendar_id = rows[0][0]        
 
+        return self.get_xml_with_calendar_id(dimming_calendar_id)            
+
+    def get_xml_with_calendar_id(self, calendar_id):
+        """ get the xml of a calendar according to the calendar id
+
+        """
         try:
                 self.cur.execute("select serialized_schedules \
                                   from driver_calendar_revisions \
@@ -82,27 +91,23 @@ class Calendar_XML_Analyzer:
         #calendar_xml is of type str
         #print(type(calendar_xml))
         #print(calendar_xml) 
-        return calendar_xml      
+        return calendar_xml   
 
-    def run(self):
-        """  call this method to run the program
+    def parse_calendar_xml(self, calendar_xml_str):
+        """ use the imported parser to parse the calendar XML
 
         """
-        #step 1:  read from json config file, get db connect parameter, time period to check, output file name
-        self.getConfig(self.configFilename)
-        #step 2:  connect to db
-        self.connectDB()
-        #step 3:  get the last calendar revision xml from the database 
-        calendar_xml_str = self.getCalendarXML(self.asset_id)
         #step 4:  parse the calendar xml 
         xml_parser = XML_Parser()
-        xml_parser.parse_from_string(calendar_xml_str)
+        xml_parser.parse_from_string(calendar_xml_str)        
+
 
 if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     asset_id = sys.argv[2]
-    analyzer = Calendar_XML_Analyzer(configJSONFilename, asset_id)    
-    analyzer.run()           
+    analyzer = Calendar_XML_Analyzer(configJSONFilename)    
+    calendar_xml_str = analyzer.get_xml_with_asset_id(asset_id)    
+    analyzer.parse_calendar_xml(calendar_xml_str)       
 
 

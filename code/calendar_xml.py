@@ -71,6 +71,7 @@ class Calendar_XML_Analyzer:
 
         rows = self.cur.fetchall()
         dimming_calendar_id = rows[0][0]        
+        print(dimming_calendar_id)
 
         return self.get_xml_with_calendar_id(dimming_calendar_id)            
 

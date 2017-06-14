@@ -431,7 +431,7 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2063, 2, 3, 10, 11]
         #asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        asset_id_list = [1603]
+        asset_id_list = [2003]
         #asset_tuple_list = self.get_assets_list()        
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)

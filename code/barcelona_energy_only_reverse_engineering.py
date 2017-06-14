@@ -510,9 +510,9 @@ class DayburnerEnergyOnly:
                 cabinet_id = component_id_tuple[7]
                 nominal_wattage = component_id_tuple[8]         
                 
-                if actual_wattage > nominal_wattage:
-                    csvWriter.writerow((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage)) 
- 
+                #if actual_wattage > nominal_wattage:
+                #    csvWriter.writerow((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage)) 
+                csvWriter.writerow((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, actual_wattage))
 
     def run(self):
         """  call this method to run the program
@@ -559,5 +559,5 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = DayburnerEnergyOnly(configJSONFilename)    
-    testObj.run()            
+    testObj.run2()            
 

@@ -97,6 +97,7 @@ class BarcelonaEnergyCheck:
 
         rows = self.cur.fetchall()
         
+        print(asset_id)
         energy_rolling_window = []
         lastTime = None
         lastDate = None
@@ -114,7 +115,7 @@ class BarcelonaEnergyCheck:
                 currentEnergy = row[1] 
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
-                print(lastEnergy, currentEnergy)
+                print(lastDate, lastEnergy, currentDate, currentEnergy)
                 print(energyConsumption, num_days)
                 dailyEnergyConsumption = energyConsumption / num_days
                 energy_rolling_window.append(dailyEnergyConsumption)

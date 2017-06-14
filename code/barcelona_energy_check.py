@@ -115,7 +115,7 @@ class BarcelonaEnergyCheck:
                 currentEnergy = row[1] 
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
-                print(lastDate, lastEnergy, currentDate, currentEnergy)
+                print(lastTime, lastEnergy, currentTime, currentEnergy)
                 print(energyConsumption, num_days)
                 dailyEnergyConsumption = energyConsumption / num_days
                 energy_rolling_window.append(dailyEnergyConsumption)

@@ -114,6 +114,8 @@ class BarcelonaEnergyCheck:
                 currentEnergy = row[1] 
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
+                print(lastEnergy, currentEnergy)
+                print(energyConsumption, num_days)
                 dailyEnergyConsumption = energyConsumption / num_days
                 energy_rolling_window.append(dailyEnergyConsumption)
                 #print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
@@ -440,7 +442,7 @@ class BarcelonaEnergyCheck:
         
         for asset_id in asset_id_list:
             self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
-            
+
         '''        
         print("total assets: ", len(asset_tuple_list))
         results = []

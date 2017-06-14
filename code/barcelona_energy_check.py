@@ -96,7 +96,8 @@ class BarcelonaEnergyCheck:
             print("I am unable to get data")        
 
         rows = self.cur.fetchall()
-
+        
+        energy_rolling_window = []
         lastTime = None
         lastDate = None
         lastEnergy = None
@@ -111,11 +112,16 @@ class BarcelonaEnergyCheck:
                 currentTime = row[2]
                 currentDate = currentTime.date()
                 currentEnergy = row[1] 
-                dailyEnergyConsumption = currentEnergy - lastEnergy
-                print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
+                energyConsumption = currentEnergy - lastEnergy
+                num_days = (currentDate - lastDate).days
+                dailyEnergyConsumption = energyConsumption / num_days
+                energy_rolling_window.append(dailyEnergyConsumption)
+                #print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
                 lastTime = currentTime    
                 lastDate = currentDate
-                lastEnergy = currentEnergy             
+                lastEnergy = currentEnergy   
+
+        print(energy_rolling_window)                  
 
     def find_dayburners_by_energy_deviation(self, asset_id, start_time, end_time):
         """ detect dayburners by checking the energy consumption deviation from the mean 
@@ -422,8 +428,8 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2063, 2, 3, 10, 11]
         #asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        #asset_id_list = [816]
-        asset_tuple_list = self.get_assets_list()
+        asset_id_list = [1603]
+        #asset_tuple_list = self.get_assets_list()        
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
@@ -431,7 +437,11 @@ class BarcelonaEnergyCheck:
         #end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)    
         start_time = datetime.datetime(2017, 4, 19, 0, 0, 0)
         end_time = datetime.datetime(2017, 5, 20, 0, 0, 0)
-                
+        
+        for asset_id in asset_id_list:
+            self.print_energy_consumption_for_asset(asset_id, start_time, end_time)
+            
+        '''        
         print("total assets: ", len(asset_tuple_list))
         results = []
         count = 0
@@ -443,7 +453,9 @@ class BarcelonaEnergyCheck:
             #results += self.find_dayburners_by_energy_deviation(asset_id, start_time, end_time)
             #results += self.find_dayburners_energy_deviation_rolling_window_avg(asset_tuple, start_time, end_time)
             results += self.compute_asset_energy_variance(asset_tuple, start_time, end_time)
-        self.write_to_file(results)    
+        self.write_to_file(results)
+        '''
+
         self.disconnect_db()
 
 if __name__ == "__main__":

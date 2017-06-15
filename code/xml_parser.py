@@ -42,10 +42,10 @@ class XML_Parser:
             shape_is_default = dimming_shape.find('citytouch_ns:IsDefault', self.ns).text
             shape_mode = dimming_shape.find('citytouch_ns:ShapeMode', self.ns).text
             shape_sunrise_offset = dimming_shape.find('citytouch_ns:SunriseOffset', self.ns).text
-            shape_runset_offset = dimming_shape.find('citytouch_ns:SunsetOffset', self.ns).text
+            shape_sunset_offset = dimming_shape.find('citytouch_ns:SunsetOffset', self.ns).text
             shape_name = dimming_shape.find('citytouch_ns:Name', self.ns).text
             shape_color_argb = dimming_shape.find('citytouch_ns:ColorArgb', self.ns).text
-            print(shape_id, shape_is_default, shape_mode, shape_sunrise_offset, shape_runset_offset, shape_name, shape_color_argb)
+            print(shape_id, shape_is_default, shape_mode, shape_sunrise_offset, shape_sunset_offset, shape_name, shape_color_argb)
             
             shape_items = dimming_shape.find('citytouch_ns:Items', self.ns)
             for dimming_shape_item in shape_items:

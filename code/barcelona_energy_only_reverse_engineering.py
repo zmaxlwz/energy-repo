@@ -470,6 +470,8 @@ class DayburnerEnergyOnly:
                 if actual_wattage is None:
                     continue
 
+                print(actual_wattage)    
+
                 #results = self.find_dayburners_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)             
                 results = self.find_dayburners_aggregation_energy_with_actual_wattage(component_id_tuple, actual_wattage, start_time, end_time)                
                 #print('len of results: ', len(results))
@@ -526,7 +528,8 @@ class DayburnerEnergyOnly:
         self.computeSunTime(self.suntime_latitude, self.suntime_longitude, self.startDate, self.endDate)
         #step 3:  get components list
         #component_id_list = [951]
-        component_id_list = self.getComponentsList()
+        #component_id_list = self.getComponentsList()
+        component_id_list = [(2003, 3957, 41.3826797751266, 2.17683879808138, '2016-02-19', '2016-02-19', 'Placa de Sant Jaume', 3935, 72)]
         #step 4:  call computeResults method
         self.computeResults(component_id_list)
         
@@ -559,5 +562,5 @@ if __name__ == "__main__":
 
     configJSONFilename = sys.argv[1]
     testObj = DayburnerEnergyOnly(configJSONFilename)    
-    testObj.run2()            
+    testObj.run()            
 

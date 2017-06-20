@@ -334,7 +334,7 @@ class SP_Calendar_Mismatch_Detector:
             # convert the time from UTC to local time
             currentTime = row[0] + self.local_time_hours_from_utc
             # log value may be -2, 0, or positive values (positive values represent dimming percent of the light)
-            currentLogValue = row[1]
+            currentLogValue = int(row[1])
             # it is true or false
             currentIsLogValueOff = row[2]
 

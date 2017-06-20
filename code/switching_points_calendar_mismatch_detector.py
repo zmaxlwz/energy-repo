@@ -8,11 +8,11 @@ from xml_parser import XML_Parser
 
 
 class SP_Calendar_Mismatch_Detector:
-	""" this class is used to detect lighting not as programmed fault by utilizing switching point data and calendar data and suntime information
+    """ this class is used to detect lighting not as programmed fault by utilizing switching point data and calendar data and suntime information
 
-	"""
+    """
 
-	def __init__(self, configJSONFilename):
+    def __init__(self, configJSONFilename):
         """ initialize variables
 
         """
@@ -297,14 +297,14 @@ class SP_Calendar_Mismatch_Detector:
         return last_calendar_item                        
 
     def find_SP_calendar_mismatch(self, asset_tuple, start_time, end_time):
-    	""" get the switching data for the input asset and check the mismatch compared with calendar and suntime
-    	    need to consider:
-    	    1) calendars for the 7 days
-    	    2) sunrise and sunset time 
-    	    3) sunrise and sunset offset in the shapes
+        """ get the switching data for the input asset and check the mismatch compared with calendar and suntime
+            need to consider:
+            1) calendars for the 7 days
+            2) sunrise and sunset time 
+            3) sunrise and sunset offset in the shapes
 
-    	"""
-    	asset_id = asset_tuple[0]
+        """
+        asset_id = asset_tuple[0]
         component_id = asset_tuple[1]
         latitude = asset_tuple[2]
         longitude = asset_tuple[3]
@@ -331,9 +331,9 @@ class SP_Calendar_Mismatch_Detector:
         rows = self.cur.fetchall()
 
         for row in rows:
-        	# convert the time from UTC to local time
-        	currentTime = row[0] + self.local_time_hours_from_utc
-        	# log value may be -2, 0, or positive values (positive values represent dimming percent of the light)
+            # convert the time from UTC to local time
+            currentTime = row[0] + self.local_time_hours_from_utc
+            # log value may be -2, 0, or positive values (positive values represent dimming percent of the light)
             currentLogValue = row[1]
             # it is true or false
             currentIsLogValueOff = row[2]
@@ -343,9 +343,9 @@ class SP_Calendar_Mismatch_Detector:
 
             noontime = datetime.time(12, 0, 0)
             if timePart < noontime:
-            	calendar_date = currentDate - self.oneDayDelta
+                calendar_date = currentDate - self.oneDayDelta
             else: 
-                calendar_date = currentDate	
+                calendar_date = currentDate 
 
             # get this day's sunrise and sunset time in local time
             sunrise_time = self.sunriseTimeDict[currentDate] + self.local_time_hours_from_utc
@@ -373,10 +373,10 @@ class SP_Calendar_Mismatch_Detector:
             sunset_time_with_buffer = sunset_time - shape_sunset_offset_time - self.sunsetTimeDelta
             calendar_percentage = calendar_item['item_percent']
             if currentLogValue > 0:
-            	# it is light on record
-            	# need to match both sun time and calendar percent                 
+                # it is light on record
+                # need to match both sun time and calendar percent                 
                 if currentTime >= sunrise_time_with_buffer and currentTime <= sunset_time_with_buffer:
-                	recordInvalid = True
+                    recordInvalid = True
                 elif currentLogValue != calendar_percentage:
                     recordInvalid = True
                 else:
@@ -387,14 +387,14 @@ class SP_Calendar_Mismatch_Detector:
                 if currentTime >= sunrise_time_lower_boundary and currentTime <= sunrise_time_with_buffer:
                     recordInvalid = False
                 elif currentLogValue == calendar_percentage:
-                    recordInvalid = False           	
+                    recordInvalid = False           
                 else:
                     recordInvalid = True
             else:
                 # the currentLogValue is -2
                 # need to be within sunrise buffer
                 if currentTime >= sunrise_time_lower_boundary and currentTime <= sunrise_time_with_buffer:
-                    recordInvalid = False	
+                    recordInvalid = False
                 else:
                     recordInvalid = True
 
@@ -434,10 +434,3 @@ if __name__ == "__main__":
     configJSONFilename = sys.argv[1]
     detector = SP_Calendar_Mismatch_Detector(configJSONFilename)    
     detector.run()            
-
-
-
-
-
-
-

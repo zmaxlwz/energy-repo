@@ -371,7 +371,7 @@ class SP_Calendar_Mismatch_Detector:
             sunrise_time_with_buffer = sunrise_time + shape_sunrise_offset_time + self.sunriseTimeDelta
             sunrise_time_lower_boundary = sunrise_time + shape_sunrise_offset_time - self.sunriseTimeDelta
             sunset_time_with_buffer = sunset_time - shape_sunset_offset_time - self.sunsetTimeDelta
-            calendar_percentage = calendar_item['item_percent']
+            calendar_percentage = int(calendar_item['item_percent'])
             if currentLogValue > 0:
                 # it is light on record
                 # need to match both sun time and calendar percent                 

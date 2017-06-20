@@ -9,6 +9,7 @@
         "onTime_threshold": "0",
         "period_start_date": "4/19/2017",
         "period_end_date": "5/20/2017",
+        "hours_from_utc": "2",
         "commissioning_date_plus_days": "3",
         "nominal_wattage_ratio": "0.1",
         "daytime_start_time": "7:0:0",

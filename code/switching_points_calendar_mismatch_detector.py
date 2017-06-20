@@ -378,6 +378,7 @@ class SP_Calendar_Mismatch_Detector:
                 if currentTime >= sunrise_time_with_buffer and currentTime <= sunset_time_with_buffer:
                     recordInvalid = True
                 elif currentLogValue != calendar_percentage:
+                	print(currentLogValue, calendar_percentage)
                     recordInvalid = True
                 else:
                     recordInvalid = False    
@@ -397,6 +398,7 @@ class SP_Calendar_Mismatch_Detector:
                     recordInvalid = False
                 else:
                     recordInvalid = True
+                    print("-2 cases")
 
             if recordInvalid:
                 # it is invalid record

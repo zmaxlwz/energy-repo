@@ -165,6 +165,71 @@ class SP_Calendar_Mismatch_Detector:
 
         return results  
 
+    def get_component_info_for_one_asset(self, asset_id):
+        """ get the information related to one asset
+
+        """
+        try:
+            self.cur.execute("select id, latitude, longitude, installation_date, commissioning_date \
+                              from assets \
+                              where id = %s", (asset_id, ))
+        except:
+            print("I am unable to get data")
+
+        row = self.cur.fetchone() 
+        asset_id = row[0]
+        latitude = row[1]
+        longitude = row[2]
+        installation_date = row[3]
+        commissioning_date = row[4]
+
+        try:
+            self.cur.execute("select id \
+                              from components \
+                              where asset_id = %s \
+                              and is_deleted = 'f' and component_kind = 0", (asset_id, ))
+        except:
+            print("I am unable to get data")
+
+        component_id_row = self.cur.fetchone() 
+        component_id = component_id_row[0] 
+
+        try:
+            self.cur.execute("select s.name as street_name \
+                              from assets as a, streets as s \
+                              where a.id = %s \
+                              and a.street_id = s.id", (asset_id, ))
+        except:
+            print("I am unable to get data")
+
+        street_name_row = self.cur.fetchone() 
+        street_name = street_name_row[0]
+
+        try:
+            self.cur.execute("select parent_id \
+                              from components A,communications_nodes B \
+                              where A.id=B.id and asset_id = %s", (asset_id, ))
+        except:
+            print("I am unable to get data")
+
+        cabinet_id_row = self.cur.fetchone()     
+        cabinet_id = cabinet_id_row[0]
+
+        try:
+            self.cur.execute("select c.asset_id, lt.type_designation, lt.actual_wattage \
+                              from luminaire_types lt, luminaires l, components c \
+                              where c.asset_id = %s and c.id = l.id and l.luminaire_type_id = lt.id", (asset_id, ))
+        except:
+            print("I am unable to get data")
+
+        nominal_wattage_row = self.cur.fetchone()     
+        nominal_wattage = nominal_wattage_row[2]
+
+        results = []
+        results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage))
+
+        return results
+
     def computeDaytimeStartEnd(self, date):
         """
 
@@ -427,7 +492,10 @@ class SP_Calendar_Mismatch_Detector:
         # get components list
         #component_id_list = [951]
         #component_id_list = self.getComponentsList()
-        component_id_list = [(2003, 3957, 41.3826797751266, 2.17683879808138, '2016-02-19', '2016-02-19', 'Placa de Sant Jaume', 3935, 72)]
+        #component_id_list = [(2003, 3957, 41.3826797751266, 2.17683879808138, '2016-02-19', '2016-02-19', 'Placa de Sant Jaume', 3935, 72)]
+        asset_id = 2003
+        component_id_list = self.get_component_info_for_one_asset(asset_id)
+        print(component_id_list)
         # call computeResults method
         self.compute_results(component_id_list)
 

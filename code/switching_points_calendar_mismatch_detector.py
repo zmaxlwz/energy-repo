@@ -484,18 +484,14 @@ class SP_Calendar_Mismatch_Detector:
             print(count)  
             self.find_SP_calendar_mismatch(component_id_tuple, start_time, end_time)        
 
-
     def run(self):
         """ call this method to run the program
 
         """
         # get components list
-        #component_id_list = [951]
         #component_id_list = self.getComponentsList()
-        #component_id_list = [(2003, 3957, 41.3826797751266, 2.17683879808138, '2016-02-19', '2016-02-19', 'Placa de Sant Jaume', 3935, 72)]
-        asset_id = 2003
+        asset_id = 2063
         component_id_list = self.get_component_info_for_one_asset(asset_id)
-        print(component_id_list)
         # call computeResults method
         self.compute_results(component_id_list)
 

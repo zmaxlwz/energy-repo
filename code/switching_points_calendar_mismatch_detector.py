@@ -353,8 +353,8 @@ class SP_Calendar_Mismatch_Detector:
                 last_calendar_item = item
             else:
                 current_calendar_item = item
-                last_time_minutes = last_calendar_item['item_minutes']
-                current_time_minutes = current_calendar_item['item_minutes']
+                last_time_minutes = int(last_calendar_item['item_minutes'])
+                current_time_minutes = int(current_calendar_item['item_minutes'])
                 if minutes_from_calendar_date_start >= last_time_minutes and minutes_from_calendar_date_start < current_time_minutes:
                     return last_calendar_item
                 last_calendar_item = current_calendar_item

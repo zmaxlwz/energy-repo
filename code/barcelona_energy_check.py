@@ -115,16 +115,16 @@ class BarcelonaEnergyCheck:
                 currentEnergy = row[1] 
                 energyConsumption = currentEnergy - lastEnergy
                 num_days = (currentDate - lastDate).days
-                print(lastTime, lastEnergy, currentTime, currentEnergy)
-                print(energyConsumption, num_days)
+                #print(lastTime, lastEnergy, currentTime, currentEnergy)
+                #print(energyConsumption, num_days)
                 dailyEnergyConsumption = energyConsumption / num_days
-                energy_rolling_window.append(dailyEnergyConsumption)
-                #print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
+                #energy_rolling_window.append(dailyEnergyConsumption)
+                print('{0} {1:5.1f} {2} {3:5.1f} {4} {5:5.1f}'.format(asset_id, dailyEnergyConsumption, lastTime, lastEnergy, currentTime, currentEnergy))
                 lastTime = currentTime    
                 lastDate = currentDate
                 lastEnergy = currentEnergy   
 
-        print(energy_rolling_window)                  
+        #print(energy_rolling_window)                  
 
     def find_dayburners_by_energy_deviation(self, asset_id, start_time, end_time):
         """ detect dayburners by checking the energy consumption deviation from the mean 
@@ -431,15 +431,15 @@ class BarcelonaEnergyCheck:
         #asset_id_list = [2063, 2, 3, 10, 11]
         #asset_id_list = [2063]
         #asset_id_list = [2100, 2102, 2103, 2110, 2111, 2112]
-        asset_id_list = [2271]
+        asset_id_list = [153]
         #asset_tuple_list = self.get_assets_list()        
 
         #start_time = datetime.datetime(2016, 7, 1, 0, 0, 0)
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
         #start_time = datetime.datetime(2016, 8, 1, 0, 0, 0)
         #end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)    
-        start_time = datetime.datetime(2017, 4, 1, 0, 0, 0)
-        end_time = datetime.datetime(2017, 5, 20, 0, 0, 0)
+        start_time = datetime.datetime(2017, 3, 15, 0, 0, 0)
+        end_time = datetime.datetime(2017, 4, 15, 0, 0, 0)
         
         for asset_id in asset_id_list:
             self.print_energy_consumption_for_asset(asset_id, start_time, end_time)

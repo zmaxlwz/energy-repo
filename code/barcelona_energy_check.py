@@ -438,7 +438,7 @@ class BarcelonaEnergyCheck:
         #end_time = datetime.datetime(2017, 4, 30, 0, 0, 0)
         #start_time = datetime.datetime(2016, 8, 1, 0, 0, 0)
         #end_time = datetime.datetime(2016, 10, 1, 0, 0, 0)    
-        start_time = datetime.datetime(2016, 12, 15, 0, 0, 0)
+        start_time = datetime.datetime(2016, 11, 15, 0, 0, 0)
         end_time = datetime.datetime(2017, 2, 10, 0, 0, 0)
         
         for asset_id in asset_id_list:

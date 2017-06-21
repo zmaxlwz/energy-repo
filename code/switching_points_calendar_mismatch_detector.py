@@ -395,6 +395,7 @@ class SP_Calendar_Mismatch_Detector:
 
         rows = self.cur.fetchall()
 
+        results = []
         for row in rows:
             # convert the time from UTC to local time
             currentTime = row[0] + self.local_time_hours_from_utc
@@ -467,7 +468,10 @@ class SP_Calendar_Mismatch_Detector:
 
             if recordInvalid:
                 # it is invalid record
-                print(asset_id, component_id, latitude, longitude, currentTime, currentLogValue, currentIsLogValueOff)   
+                #print(asset_id, component_id, latitude, longitude, currentTime, currentLogValue, currentIsLogValueOff)  
+                results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, currentTime, currentLogValue, currentIsLogValueOff)) 
+
+        return results        
 
     def compute_results(self, component_id_list):
         """ compute results
@@ -476,24 +480,41 @@ class SP_Calendar_Mismatch_Detector:
         count = 0
         start_time = datetime.datetime.combine(self.startDate, datetime.time())
         end_time = datetime.datetime.combine(self.endDate, datetime.time())
+        results = []
         for component_id_tuple in component_id_list:
             count += 1
             #only compute for first 500 components
             #if count > 500:
             #    break
             print(count)  
-            self.find_SP_calendar_mismatch(component_id_tuple, start_time, end_time)        
+            results += self.find_SP_calendar_mismatch(component_id_tuple, start_time, end_time)   
+
+        return results    
+
+    def write_to_file(self, results):
+        """ write results to output file
+
+        """
+        with open(self.outputFilename, "w") as csvFile:
+            csvWriter = csv.writer(csvFile, delimiter=',')   
+            title_row = ('asset_id', 'component_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'cabinet_id', 'nominal_wattage', 'current_time', 'current_LogValue', 'current_IsLogValueOff')         
+            csvWriter.writerow(title_row)
+            for record in results:
+                csvWriter.writerow(record)             
 
     def run(self):
         """ call this method to run the program
 
         """
         # get components list
-        #component_id_list = self.getComponentsList()
-        asset_id = 2063
-        component_id_list = self.get_component_info_for_one_asset(asset_id)
+        component_id_list = self.getComponentsList()
+        #asset_id = 2063
+        #component_id_list = self.get_component_info_for_one_asset(asset_id)
         # call computeResults method
-        self.compute_results(component_id_list)
+        results = self.compute_results(component_id_list)
+        # write to the output file
+        self.write_to_file(results)
+
 
 if __name__ == "__main__":
 

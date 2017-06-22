@@ -8,12 +8,12 @@ import json
 
 class OpenFaultsChecker:
 
-	def __init__(self, inputFilename, outputFilename):
-		""" initialize some variables
+    def __init__(self, inputFilename, outputFilename):
+        """ initialize some variables
 
-		"""
-		self.inputFilename = inputFilename
-		self.outputFilename = outputFilename
+        """
+        self.inputFilename = inputFilename
+        self.outputFilename = outputFilename
 
         self.pg_dbname = "citytouch_barcelona"
         self.pg_username = "awsmaster"
@@ -45,23 +45,23 @@ class OpenFaultsChecker:
         self.conn.close()
         
     def process_input_file(self):
-    	""" read each dayburner record from the input file 
-    	    and if there are open faults for the day-burner record, write to the output file
+        """ read each dayburner record from the input file 
+            and if there are open faults for the day-burner record, write to the output file
 
-    	"""
-    	with open(self.inputFilename, "r") as csvFile:
+        """
+        with open(self.inputFilename, "r") as csvFile:
             csvReader = csv.reader(csvFile, delimiter=',') 
             count = 0
             for record in csvReader:
-            	count += 1
-        print(count)    	
+                count += 1
+        print(count)        
 
 
     def check_open_fault(self):
         """ check if there are open faults during the day-burning date and time 
 
         """
-        pass	
+        pass    
 
     def run(self):
         """ call this method to run the program
@@ -72,10 +72,10 @@ class OpenFaultsChecker:
         self.disconnect_db()
 
 if __name__ == "__main__":
-	inputFilename = sys.argv[1]
-	outputFilename = sys.argv[2]
-	open_faults_checker = OpenFaultsChecker(inputFilename, outputFilename)
-	open_faults_checker.run()
+    inputFilename = sys.argv[1]
+    outputFilename = sys.argv[2]
+    open_faults_checker = OpenFaultsChecker(inputFilename, outputFilename)
+    open_faults_checker.run()
 
 
 

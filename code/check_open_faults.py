@@ -21,6 +21,8 @@ class OpenFaultsChecker:
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"
         self.pg_port = "5432"
 
+        self.oneDayDelta = datetime.timedelta(days=1)
+
     def connect_db(self):
         """ build connection to the database
 
@@ -51,17 +53,38 @@ class OpenFaultsChecker:
         """
         with open(self.inputFilename, "r") as csvFile:
             csvReader = csv.reader(csvFile, delimiter=',') 
+            next(csvReader)
             count = 0
             for record in csvReader:
                 count += 1
-        print(count)        
+                #print(count)
+                asset_id = record[0]
+                component_id = record[1]
+                current_date = datetime.datetime.strptime(record[10], '%Y-%m-%d').date()       
+                num_faults = self.check_open_fault(asset_id, component_id, current_date)
+                if num_faults > 0:
+                	print(asset_id, component_id, current_date, num_faults)
 
+            print(count)    	
 
-    def check_open_fault(self):
+    def check_open_fault(self, asset_id, component_id, current_date):
         """ check if there are open faults during the day-burning date and time 
 
         """
-        pass    
+        next_day = current_date + self.oneDayDelta
+
+        try:
+            self.cur.execute("select id, error_key, is_open, first_reported_on, last_reported_on, component_id, is_deleted, asset_id, last_modified_on, closed_on \
+                              from faults \
+                              where component_id = %s \
+                              and first_reported_on < %s and (closed_on > %s or closed_on is null) \
+                              order by first_reported_on", (component_id, next_day, current_date))
+        except:
+            print("I am unable to get data")   
+
+        fault_rows = self.cur.fetchall()  
+        
+        return len(fault_rows)   
 
     def run(self):
         """ call this method to run the program

@@ -30,20 +30,22 @@ class EnergyConsumption:
         #self.sunrise_time_avg_utc = datetime.time(23, 0, 0)
         #average sunrise time in CABA in UTC in 2016-5
         #self.sunrise_time_avg_utc = datetime.time(10, 40, 0)
+        #self.sunrise_time_avg_local = datetime.time(7, 40, 0)
         #average sunrise time in LA in UTC in 2017-1
         #self.sunrise_time_avg_utc = datetime.time(15, 0, 0)  
         #average sunrise time in LA in local time in 2017-1
-        self.sunrise_time_avg_utc = datetime.time(7, 0, 0)  
+        #self.sunrise_time_avg_local = datetime.time(7, 0, 0)  
               
         #average sunset time in Jakarta in UTC
         #self.sunset_time_avg_utc = datetime.time(11, 4, 16)
         #self.sunset_time_avg_utc = datetime.time(11, 0, 0)
         #average sunset time in CABA in UTC in 2016-5
         #self.sunset_time_avg_utc = datetime.time(21, 0, 0)
+        #self.sunset_time_avg_local = datetime.time(18, 0, 0)
         #average sunset time in LA in UTC in 2017-1
         #self.sunset_time_avg_utc = datetime.time(1, 0, 0)
         #average sunset time in LA in local time in 2017-1
-        self.sunset_time_avg_utc = datetime.time(17, 0, 0)
+        #self.sunset_time_avg_local = datetime.time(17, 0, 0)
         
         #assets latitude dict
         self.assets_latitude_dict = {}
@@ -103,7 +105,11 @@ class EnergyConsumption:
             #daytime start time
             self.daytime_start_time = datetime.datetime.strptime(config_data['daytime_start_time'], '%H:%M:%S').time()
             #daytime end time
-            self.daytime_end_time = datetime.datetime.strptime(config_data['daytime_end_time'], '%H:%M:%S').time()            
+            self.daytime_end_time = datetime.datetime.strptime(config_data['daytime_end_time'], '%H:%M:%S').time()    
+            #sunrise avg local time
+            self.sunrise_time_avg_local = datetime.datetime.strptime(config_data['sunrise_time_avg_local'], '%H:%M:%S').time()   
+            #sunset avg local time
+            self.sunset_time_avg_local = datetime.datetime.strptime(config_data['sunset_time_avg_local'], '%H:%M:%S').time()       
             #commissioning date plus the number of days
             self.commissioningDatePlusDays = int(config_data['commissioning_date_plus_days'])
             #sunrise adjusted time delta - sunrise time should add this delta
@@ -114,6 +120,11 @@ class EnergyConsumption:
             self.suntime_latitude = float(config_data['suntime_location_latitude'])
             #suntime location longitude
             self.suntime_longitude = float(config_data['suntime_location_longitude'])
+
+            # hours from UTC time for the local time
+            hours_from_utc = int(config_data['hours_from_utc'])
+            # UTC time plus this time to get local time
+            self.local_time_hours_from_utc = datetime.timedelta(hours=hours_from_utc)
 
     def run(self):
         """  call this method to run the program
@@ -161,7 +172,7 @@ class EnergyConsumption:
 
         """                
         try:
-            '''
+            
             self.cur.execute("select id \
                               from assets \
                               where is_deleted = 'f' \
@@ -172,7 +183,7 @@ class EnergyConsumption:
                               from assets \
                               where is_deleted = 'f' \
                               and commissioning_date is not null")
-
+            '''         
         except:
             print("I am unable to get data")
 
@@ -190,7 +201,7 @@ class EnergyConsumption:
 
         """
         try:
-            '''
+            
             self.cur.execute("select a.id, a.latitude, a.longitude, a.installation_date, a.commissioning_date, s.name as street_name \
                               from assets as a, streets as s \
                               where a.is_deleted = 'f' \
@@ -202,7 +213,8 @@ class EnergyConsumption:
                               from assets as a, streets_reverse_geocoded as s \
                               where a.is_deleted = 'f' \
                               and a.commissioning_date is not null \
-                              and a.id = s.asset_id")                  
+                              and a.id = s.asset_id")   
+            '''                                 
         except:
             print("I am unable to get data")
 
@@ -226,7 +238,7 @@ class EnergyConsumption:
 
         """        
         try:
-            '''
+            
             self.cur.execute("select a.id, lt.type_designation, lt.nominal_wattage, lt.actual_wattage \
                               from luminaire_types lt, luminaires l, components c, assets a \
                               where a.is_deleted = 'f' and a.installation_date is not null and a.commissioning_date is not null \
@@ -239,7 +251,7 @@ class EnergyConsumption:
                               where a.is_deleted = 'f' and a.commissioning_date is not null \
                               and a.id = c.asset_id and c.id = l.id and l.luminaire_type_id = lt.id \
                               order by a.id")                  
-
+            '''
         except:
             print("I am unable to get data")
 
@@ -288,7 +300,8 @@ class EnergyConsumption:
                 row_meter_component_id = row[1]
                 row_energy = row[2]
                 # convert time from UTC to local time
-                row_time = row[3] - self.eightHoursDelta
+                #row_time = row[3] - self.eightHoursDelta
+                row_time = row[3] + self.local_time_hours_from_utc
                 if current_asset_id is None or current_asset_id != row_asset_id or current_meter_component_id != row_meter_component_id:
                     #it is a new asset
                     if current_asset_id is not None:
@@ -318,12 +331,12 @@ class EnergyConsumption:
                     current_date_day_start_time = datetime.datetime.combine(current_date, self.daytime_start_time)
                     current_date_day_end_time = datetime.datetime.combine(current_date, self.daytime_end_time)  
                     '''
-                    next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_utc)
+                    next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_local)
                     #next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
                     next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                     #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                     next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                    next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_local)
                     #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                     num_interval, num_interval_positive = 0, 0
@@ -376,12 +389,12 @@ class EnergyConsumption:
                     current_date = next_date_day_end_time.date()
                     results.append((current_asset_region_name, current_date, current_asset_id, current_meter_component_id, current_asset_luminaire_type, current_asset_latitude, current_asset_longitude, current_asset_installation_date, current_asset_commissioning_date, current_asset_nominal_wattage, current_asset_street_name, totalOnTime, first_time_stamp_after_sunrise, last_time_stamp_before_sunset, totalEnergyConsumed, totalWatts, num_interval, num_interval_positive))
                 
-                next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_utc)
+                next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_local)
                 #next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
                 next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
                 #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
                 next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
-                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_utc)
+                next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_local)
                 #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                 totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
                 num_interval, num_interval_positive = 0, 0

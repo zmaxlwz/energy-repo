@@ -103,9 +103,9 @@ class EnergyConsumption:
             #period end date
             self.endDate = datetime.datetime.strptime(config_data['period_end_date'], '%m/%d/%Y').date()
             #daytime start time
-            self.daytime_start_time = datetime.datetime.strptime(config_data['daytime_start_time'], '%H:%M:%S').time()
+            self.daytime_start_time_local = datetime.datetime.strptime(config_data['daytime_start_time_local'], '%H:%M:%S').time()
             #daytime end time
-            self.daytime_end_time = datetime.datetime.strptime(config_data['daytime_end_time'], '%H:%M:%S').time()    
+            self.daytime_end_time_local = datetime.datetime.strptime(config_data['daytime_end_time_local'], '%H:%M:%S').time()    
             #sunrise avg local time
             self.sunrise_time_avg_local = datetime.datetime.strptime(config_data['sunrise_time_avg_local'], '%H:%M:%S').time()   
             #sunset avg local time
@@ -333,9 +333,9 @@ class EnergyConsumption:
                     '''
                     next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_local)
                     #next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
-                    next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                    next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time_local)
                     #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
-                    next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
+                    next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time_local)
                     next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_local)
                     #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                     totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0
@@ -391,9 +391,9 @@ class EnergyConsumption:
                 
                 next_date_sunrise_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunrise_time_avg_local)
                 #next_date_sunrise_time = datetime.datetime.combine(row_time.date(), self.sunrise_time_avg_utc)
-                next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time)
+                next_date_day_start_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_start_time_local)
                 #next_date_day_start_time = datetime.datetime.combine(row_time.date(), self.daytime_start_time)
-                next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time)
+                next_date_day_end_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.daytime_end_time_local)
                 next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta, self.sunset_time_avg_local)
                 #next_date_sunset_time = datetime.datetime.combine(row_time.date() + self.oneDayDelta + self.oneDayDelta, self.sunset_time_avg_utc)
                 totalOnTime, totalEnergyConsumed, totalWatts = 0, 0, 0

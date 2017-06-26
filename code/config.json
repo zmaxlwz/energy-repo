@@ -11,7 +11,7 @@
         "period_end_date": "5/31/2016",
         "hours_from_utc": "-3",
         "commissioning_date_plus_days": "3",
-        "nominal_wattage_ratio": "0.1",
+        "nominal_wattage_ratio": "0.3",
         "daytime_start_time_local": "7:40:0",
         "daytime_end_time_local": "18:0:0",
         "sunrise_time_avg_local": "7:40:0",

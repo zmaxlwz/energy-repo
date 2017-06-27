@@ -249,7 +249,7 @@ class DayburnerEnergyNominalWattage:
             # compute the normal energy consumption in kwh using night time and nominal wattage
             normal_energy_consumption = (nominal_wattage * nighttime_in_min / 60.0) / 1000.0 
 
-            if dailyEnergyConsumption - normal_energy_consumption > 0.2:
+            if dailyEnergyConsumption - normal_energy_consumption > 0.1:
                 # actual energy consumption is more than 0.2 kwh higher than normal_energy_consumption, report that
                 results.append((asset_id, component_id, latitude, longitude, installation_date, commissioning_date, street_name, cabinet_id, nominal_wattage, currentDate, dailyEnergyConsumption, normal_energy_consumption))
 

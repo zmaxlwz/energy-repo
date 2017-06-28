@@ -164,6 +164,7 @@ class DayburnerEnergyNominalWattage:
                 print("I am unable to get data")
 
             calendar_id_row = self.cur.fetchone()
+            print(asset_id, calendar_id_row)
             calendar_id = int(calendar_id_row[0])
             if calendar_id != 1:
                 # this asset doesn't follow the 100% calendar, ignore it in this analysis

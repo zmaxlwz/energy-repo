@@ -159,12 +159,13 @@ class DayburnerEnergyNominalWattage:
             try:
                 self.cur.execute("select dimming_calendar_id \
                                   from components A, communications_nodes B \
-                                  where A.id = B.id and asset_id = %s", (asset_id, ))
+                                  where A.id = B.id and asset_id = %s \
+                                  and dimming_calendar_id is not null", (asset_id, ))
             except:
                 print("I am unable to get data")
 
             calendar_id_row = self.cur.fetchone()
-            print(asset_id, calendar_id_row)
+            # print(asset_id, calendar_id_row)
             calendar_id = int(calendar_id_row[0])
             if calendar_id != 1:
                 # this asset doesn't follow the 100% calendar, ignore it in this analysis

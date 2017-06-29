@@ -371,7 +371,10 @@ class EnergyConsumption:
                         consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
                         #print(row)
                         #print(energyConsumed, consumptionRate, secondsInterval)
-                        if consumptionRate > current_asset_nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold:
+                        if consumptionRate > current_asset_nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold and consumptionRate < 5 * current_asset_nominal_wattage:
+                            # the wattage in this interval is > 30% of nominal wattage and < 5 times of nominal wattage
+                            # if < 30% of nominal wattage, it is not significant, may not be a day-burner
+                            # if > 5 times of nominal wattage, this may be due to data error, not day-burner
                             totalOnTime += secondsInterval / 60.0
                             totalEnergyConsumed += energyConsumed
                             num_interval_positive += 1

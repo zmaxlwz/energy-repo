@@ -4,6 +4,7 @@ import math
 import sys
 import StringIO
 import traceback
+import json
 
 #in this class, I will generate streets, local neighbors and global neighbors in an offline fashion
 

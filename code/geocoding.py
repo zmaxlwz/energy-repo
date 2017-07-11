@@ -108,7 +108,7 @@ class GeoCoding:
             self.cur.execute("select id, latitude, longitude \
                               from assets \
                               where is_deleted = 'f' \
-                              and commissioning_date is not null \
+                              and installation_date is not null and commissioning_date is not null \
                               and id not in ( \
                               select asset_id from streets_reverse_geocoded \
                               )")
@@ -131,7 +131,7 @@ class GeoCoding:
 
         """
         
-        count = 25056
+        count = 66108
         for row in assets_list:
             count += 1            
             #if count > 4:
@@ -202,10 +202,10 @@ class GeoCoding:
         self.connect_db()
 
         #assets_list = self.getAssetsList()
-        #assets_list = self.getRemainingAssetsList()
-        #self.reverseGeocoding(assets_list)
-        self.load_existing_records()
-        
+        assets_list = self.getRemainingAssetsList()
+        self.reverseGeocoding(assets_list)
+        #self.load_existing_records()
+
         self.disconnect_db()
 
 if __name__ == "__main__":

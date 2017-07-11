@@ -13,7 +13,7 @@ class GeoCoding:
         self.client = gmaps.Client(key = self.key)
         #self.table_name = 'streets_reverse_geocoded'
 
-        self.pg_dbname = "los_angeles"
+        self.pg_dbname = "citytouch_temp"
         self.pg_username = "awsmaster"
         self.pg_password = "philips2017"
         self.pg_host = "citytouch-buenos-aires-log.cuxwb2nbset5.us-west-2.rds.amazonaws.com"
@@ -41,6 +41,40 @@ class GeoCoding:
         """    
         self.cur.close()
         self.conn.close()
+
+    def load_existing_records(self):
+        """ this method is only for CABA, use it to load street address already geocoded into the database
+
+        """
+        try:
+            self.cur.execute("select id, street_name, city_name, country_name \
+                              from assets_map_complete \
+                              where is_deleted = 'f' \
+                              and installation_date is not null and commissioning_date is not null")
+        except:
+            print("I am unable to get data")
+
+        rows = self.cur.fetchall()
+        count = 0
+
+        for row in rows:
+            count += 1
+            asset_id = row[0]
+            street_name = row[1]
+            city_name = row[2]
+            country_name = row[3]    
+
+            print(count, asset_id, street_name, city_name, country_name)  
+
+            try:
+                self.cur.execute("insert into streets_reverse_geocoded \
+                                  (id, asset_id, route, administrative_area_level_2, country) \
+                                  values (%s, %s, %s, %s, %s)", (count, asset_id, street_name, city_name, country_name))
+            except:
+                print("I am unable to insert data")
+
+            self.conn.commit()  
+
 
     def getAssetsList(self):
         """ get assets list from assets table, 
@@ -166,9 +200,12 @@ class GeoCoding:
 
         """
         self.connect_db()
+
         #assets_list = self.getAssetsList()
-        assets_list = self.getRemainingAssetsList()
-        self.reverseGeocoding(assets_list)
+        #assets_list = self.getRemainingAssetsList()
+        #self.reverseGeocoding(assets_list)
+        self.load_existing_records()
+        
         self.disconnect_db()
 
 if __name__ == "__main__":

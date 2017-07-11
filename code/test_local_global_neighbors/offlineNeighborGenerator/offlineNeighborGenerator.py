@@ -15,16 +15,37 @@ class OfflineNeighborGenerator:
         self.radius = 150       # the radius (in meters) for global neighbor generation, this radius defines a rectangle neighborhood region 
         self.latlongEpsilon = 0.000001          #the latitude and longitude epsilon value, if two values differ by >= this value, the two values are different
         
-        #create connection to the database
+        self.get_config('../config/config.json')
+        self.connect_db()
+
+    def connect_db(self):
+        """ build connection to the database
+
+        """    
+        #connect to the database
         try:
-            self.conn = psycopg2.connect("dbname='caba_test' user='wenzhao' password='zmax1987' host='localhost' port='5432'")
-            #print "connected!"   
+            print(self.pg_dbname)
+            self.conn = psycopg2.connect("dbname=%s user=%s password=%s host=%s port=%s" % (self.pg_dbname, self.pg_username, self.pg_password, self.pg_host, self.pg_port))
+            print("connected!")
         except psycopg2.Error as e:
-            print "I am unable to connect to the database"
-            print e
+            print("I am unable to connect to the database")
+            print(e)
 
         #define cursor
-        self.cur = self.conn.cursor()
+        self.cur = self.conn.cursor() 
+
+    def get_config(self, configFilename):
+        """ get configuration parameters
+
+        """    
+        with open(configFilename) as config_file:    
+            config_data = json.load(config_file)
+                    
+            self.pg_dbname = config_data['pg_dbname']
+            self.pg_username = config_data['pg_username']
+            self.pg_password = config_data['pg_password']
+            self.pg_host = config_data['pg_host']
+            self.pg_port = config_data['pg_port']     
             
     
     """Distance helper function."""
@@ -82,7 +103,10 @@ class OfflineNeighborGenerator:
     def generateStreetLocalNeighbors(self):
         #this method generates street local neighbors
         
-        self.cur.execute("select street_id, street_name from streets")
+        #self.cur.execute("select street_id, street_name from streets")
+        # skip the DEFAULT street
+        self.cur.execute("select id, name from streets where id <> 1")
+        
         street_rows = self.cur.fetchall()
         
         num_streets = len(street_rows)
@@ -102,7 +126,12 @@ class OfflineNeighborGenerator:
             street_name = street_name_list[street_index]
             
             #get all assets record in this street from the 'assets_map_complete' table
-            self.cur.execute("select id, latitude, longitude from assets_map_complete where is_deleted = 'f' and lower(street_name)=%s", (street_name,))
+            #self.cur.execute("select id, latitude, longitude from assets_map_complete where is_deleted = 'f' and lower(street_name)=%s", (street_name,))
+
+            self.cur.execute("select id, latitude, longitude \
+                              from assets \
+                              where is_deleted = 'f' and installation_date is not null and commissioning_date is not null \
+                              and street_id = %s", (street_id,))
 
             #all assets rows in the street
             asset_rows_in_one_street = self.cur.fetchall()
@@ -168,6 +197,11 @@ class OfflineNeighborGenerator:
                 if closest_neighbor_distance == sys.maxint or second_closest_neighbor_distance == sys.maxint:
                     print "invalid distance occurs, skip the record, don't insert into the asset_neighbors table"
                     continue
+
+                #if the closest distance or second closest distance is greater than 1000 meters (max limit), skip, don't insert into database
+                if closest_neighbor_distance > 1000 or second_closest_neighbor_distance > 1000:
+                    print "invalid distance occurs, skip the record, don't insert into the asset_neighbors table"
+                    continue    
         
                 #already get the closest neighbor and second closest neighbor 
                 #store the two neighbors into the database table 'asset_neighbors', attributes include: 
@@ -243,7 +277,11 @@ class OfflineNeighborGenerator:
         (lonRangeLow, lonRangeHigh) = self.same_lat_get_long(latlong, radius)
         
         #get all assets within this neighborhood region, including this newly added asset
-        self.cur.execute("select id, latitude, longitude from assets_map_complete where is_deleted = 'f' and latitude between %s and %s and longitude between %s and %s", (latRangeLow, latRangeHigh, lonRangeLow, lonRangeHigh))
+        #self.cur.execute("select id, latitude, longitude from assets_map_complete where is_deleted = 'f' and latitude between %s and %s and longitude between %s and %s", (latRangeLow, latRangeHigh, lonRangeLow, lonRangeHigh))
+        self.cur.execute("select id, latitude, longitude \
+                          from assets \
+                          where is_deleted = 'f' and installation_date is not null and commissioning_date is not null \
+                          and latitude between %s and %s and longitude between %s and %s", (latRangeLow, latRangeHigh, lonRangeLow, lonRangeHigh))
 
         #all assets rows in the neighborhood region
         #if there is no assets in the region, asset_rows_in_neighborhood_region will be [], an empty list
@@ -256,7 +294,14 @@ class OfflineNeighborGenerator:
     def generateGlobalNeighbors(self):
         #this method generates global neighbors
         
-        self.cur.execute("select id, latitude, longitude, street_id from assets_map_complete as a, streets as s where a.is_deleted = 'f' and lower(a.street_name) = s.street_name")
+        #self.cur.execute("select id, latitude, longitude, street_id from assets_map_complete as a, streets as s where a.is_deleted = 'f' and lower(a.street_name) = s.street_name")
+        
+        # get all valid assets and their street id, skip street 1, which is DEFAULT street
+        self.cur.execute("select id, latitude, longitude, street_id \
+                          from assets \
+                          where is_deleted = 'f' and installation_date is not null and commissioning_date is not null \
+                          and street_id <> 1")
+        
         all_asset_rows = self.cur.fetchall()
         
         num_assets = len(all_asset_rows)
@@ -381,7 +426,7 @@ class OfflineNeighborGenerator:
 
     def run(self):
         #populate the streets table
-        self.populateStreetsTable()
+        #self.populateStreetsTable()
         
         #generate street local neighbors
         self.generateStreetLocalNeighbors()

@@ -93,6 +93,8 @@ class CABAEnergyCheck:
             asset_id = row[0]
             asset_id_list.append(asset_id)
 
+        return asset_id_list    
+
     def run(self):
         self.connect_db()
         assets_id_list = self.get_assets_list()

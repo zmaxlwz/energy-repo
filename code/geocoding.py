@@ -131,7 +131,7 @@ class GeoCoding:
 
         """
         
-        count = 85979
+        count = 95909
         for row in assets_list:
             count += 1            
             #if count > 4:

@@ -22,8 +22,8 @@ class XML_Parser:
 
         """    
         root = ET.fromstring(xml_string)
-        self.parser_display(root)
-        #return self.parser(root)
+        #self.parser_display(root)
+        return self.parser(root)
 
     def parser(self, root):
         """ parse the XML tree from the input root

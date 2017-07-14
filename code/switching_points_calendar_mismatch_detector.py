@@ -436,7 +436,8 @@ class SP_Calendar_Mismatch_Detector:
             recordInvalid = False
             sunrise_time_with_buffer = sunrise_time + shape_sunrise_offset_time + self.sunriseTimeDelta
             sunrise_time_lower_boundary = sunrise_time + shape_sunrise_offset_time - self.sunriseTimeDelta
-            sunset_time_with_buffer = sunset_time - shape_sunset_offset_time - self.sunsetTimeDelta
+            # always add the offset, for Jakarta_utara, the sunset_offset for calendar 2 is -6, so we add this value to sunset time
+            sunset_time_with_buffer = sunset_time + shape_sunset_offset_time - self.sunsetTimeDelta
             calendar_percentage = int(calendar_item['item_percent'])
             if currentLogValue > 0:
                 # it is light on record

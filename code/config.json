@@ -7,9 +7,9 @@
         "output_csvfile_name": "result21.csv",
         "energy_threshold": "5",
         "onTime_threshold": "0",
-        "period_start_date": "4/20/2017",
-        "period_end_date": "5/19/2017",
-        "hours_from_utc": "2",
+        "period_start_date": "1/1/2017",
+        "period_end_date": "2/1/2017",
+        "hours_from_utc": "7",
         "commissioning_date_plus_days": "3",
         "nominal_wattage_ratio": "0.3",
         "daytime_start_time_local": "7:40:0",
@@ -22,6 +22,6 @@
         "sunset_time_delta_hours": "0",
         "sunset_time_delta_minutes": "30",
         "sunset_time_delta_seconds": "0",
-        "suntime_location_latitude": "41.3871799038227",
-        "suntime_location_longitude": "2.15986007115481"
+        "suntime_location_latitude": "-6.1371975",
+        "suntime_location_longitude": "106.8462329184025"
 }

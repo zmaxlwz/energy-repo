@@ -508,9 +508,9 @@ class SP_Calendar_Mismatch_Detector:
 
         """
         # get components list
-        component_id_list = self.getComponentsList()
-        #asset_id = 2063
-        #component_id_list = self.get_component_info_for_one_asset(asset_id)
+        #component_id_list = self.getComponentsList()
+        asset_id = 13532
+        component_id_list = self.get_component_info_for_one_asset(asset_id)
         # call computeResults method
         results = self.compute_results(component_id_list)
         # write to the output file

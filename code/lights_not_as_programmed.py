@@ -280,7 +280,15 @@ class LightsNotAsProgrammed:
         """ get the last calendar revision XML for the input asset id
 
         """
-        component_id = self.assets_component_id_dict[asset_id]
+        try:
+                self.cur.execute("select id \
+                                  from components \
+                                  where asset_id = %s and component_kind = 100", (asset_id,))
+        except:
+                print("I am unable to get data") 
+
+        row = self.cur.fetchone()
+        component_id = row[0]
         print(component_id)
 
         try:
@@ -290,8 +298,8 @@ class LightsNotAsProgrammed:
         except:
                 print("I am unable to get data") 
 
-        rows = self.cur.fetchall()
-        dimming_calendar_id = rows[0][0]        
+        row = self.cur.fetchone()
+        dimming_calendar_id = row[0]      
         print(dimming_calendar_id)
 
         return self.get_xml_with_calendar_id(dimming_calendar_id)            

@@ -300,7 +300,7 @@ class LightsNotAsProgrammed:
 
         row = self.cur.fetchone()
         dimming_calendar_id = row[0]      
-        #print(dimming_calendar_id)
+        print(dimming_calendar_id)
 
         return self.get_xml_with_calendar_id(dimming_calendar_id)            
 
@@ -317,6 +317,9 @@ class LightsNotAsProgrammed:
                 print("I am unable to get data")
 
         rows = self.cur.fetchall()
+        if len(rows) == 0:
+            return None
+
         calendar_xml = rows[0][0] 
         #calendar_xml is of type str
         #print(type(calendar_xml))
@@ -379,9 +382,11 @@ class LightsNotAsProgrammed:
         street_name = self.assets_street_name_dict[asset_id]
         nominal_wattage = self.assets_nominal_wattage_dict[asset_id]
 
-        #print("asset id: ", asset_id)
+        print("asset id: ", asset_id)
         # get calendars for this asset from XML
         calendar_xml_str = self.get_xml_with_asset_id(asset_id)
+        if calendar_xml_str is None:
+            return []
         # calendars is a list of 7 dictionaries (shapes), each of which correponds to one day in a week, starting from Sunday
         calendars = self.parse_calendar_xml(calendar_xml_str)
 

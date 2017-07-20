@@ -8,14 +8,14 @@ from xml_parser import XML_Parser
 
 
 class LightsNotAsProgrammed:
-	""" this class is used to detect both dayburners and night time outage
-	    at daytime, if the actual wattage is [30%, 500%] * nominal wattage, then it is a dayburning interval
-	    at nighttime, if the actual wattage is not within [calendar_percentage - 5%,  calendar_percentage + 5%] * nominal wattage, 
-	       then it is night time outage
+    """ this class is used to detect both dayburners and night time outage
+        at daytime, if the actual wattage is [30%, 500%] * nominal wattage, then it is a dayburning interval
+        at nighttime, if the actual wattage is not within [calendar_percentage - 5%,  calendar_percentage + 5%] * nominal wattage, 
+           then it is night time outage
 
-	"""
+    """
 
-	def __init__(self, configJSONFilename):
+    def __init__(self, configJSONFilename):
         """ initialize variables
 
         """
@@ -232,9 +232,9 @@ class LightsNotAsProgrammed:
         rows = self.cur.fetchall() 
 
         for row in rows:
-        	asset_id = row[0]
-        	component_id = row[1]
-        	self.assets_component_id_dict[asset_id] = component_id
+            asset_id = row[0]
+            component_id = row[1]
+            self.assets_component_id_dict[asset_id] = component_id
 
     def computeDaytimeStartEnd(self, date):
         """
@@ -393,92 +393,92 @@ class LightsNotAsProgrammed:
         lastTime = None
         lastEnergy = None
         for row in rows:
-        	energy_reading = row[2]
-        	localtime = row[3] + self.local_time_hours_from_utc
-        	if localtime.date() < valid_start_date:
-        		continue
-        	if lastTime is None:
-        		lastTime = localtime
-        		lastEnergy = energy_reading
-        	else:
-        	    currentTime = localtime
-        	    currentEnergy = energy_reading
-        	    
-        	    currentDate = currentTime.date()
-	            timePart = currentTime.time()
+            energy_reading = row[2]
+            localtime = row[3] + self.local_time_hours_from_utc
+            if localtime.date() < valid_start_date:
+                continue
+            if lastTime is None:
+                lastTime = localtime
+                lastEnergy = energy_reading
+            else:
+                currentTime = localtime
+                currentEnergy = energy_reading
+                
+                currentDate = currentTime.date()
+                timePart = currentTime.time()
 
-	            noontime = datetime.time(12, 0, 0)
-	            if timePart < noontime:
-	                calendar_date = currentDate - self.oneDayDelta
-	            else: 
-	                calendar_date = currentDate 
+                noontime = datetime.time(12, 0, 0)
+                if timePart < noontime:
+                    calendar_date = currentDate - self.oneDayDelta
+                else: 
+                    calendar_date = currentDate 
 
-	            # get this day's sunrise and sunset time in local time
-	            sunrise_time = self.sunriseTimeDict[currentDate] + self.local_time_hours_from_utc
-	            sunset_time = self.sunsetTimeDict[currentDate] + self.local_time_hours_from_utc  
+                # get this day's sunrise and sunset time in local time
+                sunrise_time = self.sunriseTimeDict[currentDate] + self.local_time_hours_from_utc
+                sunset_time = self.sunsetTimeDict[currentDate] + self.local_time_hours_from_utc  
 
-	            calendar_index = self.check_weekday_of_date(calendar_date)
-	            calendar_shape_dict = calendars[calendar_index] 
+                calendar_index = self.check_weekday_of_date(calendar_date)
+                calendar_shape_dict = calendars[calendar_index] 
 
-	            shape_sunrise_offset = int(calendar_shape_dict['shape_sunrise_offset'])
-	            shape_sunrise_offset_time = datetime.timedelta(minutes=shape_sunrise_offset)
-	            shape_sunset_offset = int(calendar_shape_dict['shape_sunset_offset'])
-	            shape_sunset_offset_time = datetime.timedelta(minutes=shape_sunset_offset)
-	            # shape_items is a list of dictionary (each dict is an item ordered by time)
-	            shape_items = calendar_shape_dict['items']
+                shape_sunrise_offset = int(calendar_shape_dict['shape_sunrise_offset'])
+                shape_sunrise_offset_time = datetime.timedelta(minutes=shape_sunrise_offset)
+                shape_sunset_offset = int(calendar_shape_dict['shape_sunset_offset'])
+                shape_sunset_offset_time = datetime.timedelta(minutes=shape_sunset_offset)
+                # shape_items is a list of dictionary (each dict is an item ordered by time)
+                shape_items = calendar_shape_dict['items']
 
-	            calendar_date_start_time = datetime.datetime.combine(calendar_date, datetime.time())
-	            minutes_from_calendar_date_start = (currentTime - calendar_date_start_time).total_seconds() / 60
+                calendar_date_start_time = datetime.datetime.combine(calendar_date, datetime.time())
+                minutes_from_calendar_date_start = (currentTime - calendar_date_start_time).total_seconds() / 60
 
-	            calendar_item = self.get_calendar_item(shape_items, minutes_from_calendar_date_start)  
-	            
-	            sunrise_time_with_buffer = sunrise_time + shape_sunrise_offset_time + self.sunriseTimeDelta
-	            sunrise_time_lower_boundary = sunrise_time + shape_sunrise_offset_time - self.sunriseTimeDelta
-	            # always add the offset, for Jakarta_utara, the sunset_offset for calendar 2 is -6, so we add this value to sunset time
-	            sunset_time_with_buffer = sunset_time + shape_sunset_offset_time - self.sunsetTimeDelta
-	            sunset_time_higher_boundary = sunset_time + shape_sunset_offset_time + self.sunsetTimeDelta
-	            calendar_percentage = int(calendar_item['item_percent']) 
+                calendar_item = self.get_calendar_item(shape_items, minutes_from_calendar_date_start)  
+                
+                sunrise_time_with_buffer = sunrise_time + shape_sunrise_offset_time + self.sunriseTimeDelta
+                sunrise_time_lower_boundary = sunrise_time + shape_sunrise_offset_time - self.sunriseTimeDelta
+                # always add the offset, for Jakarta_utara, the sunset_offset for calendar 2 is -6, so we add this value to sunset time
+                sunset_time_with_buffer = sunset_time + shape_sunset_offset_time - self.sunsetTimeDelta
+                sunset_time_higher_boundary = sunset_time + shape_sunset_offset_time + self.sunsetTimeDelta
+                calendar_percentage = int(calendar_item['item_percent']) 
                 
                 # the status is an indicator ('normal', 'dayburner', 'night_outage', 'night_not_dimming')
                 status = 'normal'
                 secondsInterval = (currentTime - lastTime).total_seconds()
                 energyConsumed = currentEnergy - lastEnergy
                 
-	            if secondsInterval == 0:
-	            	lastTime = currentTime
-	                lastEnergy = currentEnergy
+                if secondsInterval == 0:
+                    lastTime = currentTime
+                    lastEnergy = currentEnergy
                     continue
                 # compute the wattage within the interval    
                 consumptionRate = (energyConsumed * 1000) / (secondsInterval / 3600.0)
                     
-	            if currentTime >= sunrise_time_with_buffer and currentTime <= sunset_time_with_buffer:
-	                # this is the day time, check if it is a dayburning interval
-	                if consumptionRate > nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold and consumptionRate < 5 * nominal_wattage:
-	                	# this is a dayburning interval
-	                	status = 'dayburner'
-	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, 0, consumptionRate, status))
+                if currentTime >= sunrise_time_with_buffer and currentTime <= sunset_time_with_buffer:
+                    # this is the day time, check if it is a dayburning interval
+                    if consumptionRate > nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold and consumptionRate < 5 * nominal_wattage:
+                        # this is a dayburning interval
+                        status = 'dayburner'
+                        results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, 0, consumptionRate, status))
 
-	            elif currentTime < sunrise_time_lower_boundary or currentTime > sunset_time_higher_boundary:
-	                # this is the night time, check if the energy consumption following calendars
-	                if consumptionRate < nominal_wattage * (calendar_percentage * 0.01 - 0.1):
-	                	# the actal wattage is below the (calendar percentage - 10%) * nominal_wattage, it is night time outage 
-	                	status = 'night_outage'
-	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
+                elif currentTime < sunrise_time_lower_boundary or currentTime > sunset_time_higher_boundary:
+                    # this is the night time, check if the energy consumption following calendars
+                    if consumptionRate < nominal_wattage * (calendar_percentage * 0.01 - 0.1):
+                        # the actal wattage is below the (calendar percentage - 10%) * nominal_wattage, it is night time outage 
+                        status = 'night_outage'
+                        results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
 
-	                elif consumptionRate > nominal_wattage * (calendar_percentage * 0.01 + 0.1) and consumptionRate <= nominal_wattage * (1 + 0.1):
-	                    # the actual wattage is above the (calendar percentage + 10%) * nominal_wattage and below 110% * nominal_wattage, it is night not dimming
-	                    status = 'night_not_dimming'
-	                    results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
+                    elif consumptionRate > nominal_wattage * (calendar_percentage * 0.01 + 0.1) and consumptionRate <= nominal_wattage * (1 + 0.1):
+                        # the actual wattage is above the (calendar percentage + 10%) * nominal_wattage and below 110% * nominal_wattage, it is night not dimming
+                        status = 'night_not_dimming'
+                        results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
 
-	                elif consumptionRate > nominal_wattage * (1 + 0.1):
-	                	# the actual wattage is above 110% * nominal_wattage, it is actual wattage above nominal wattage
-	                    status = 'actual_above_nominal_wattage'   
-	                    results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status)) 
+                    elif consumptionRate > nominal_wattage * (1 + 0.1):
+                        # the actual wattage is above 110% * nominal_wattage, it is actual wattage above nominal wattage
+                        status = 'actual_above_nominal_wattage'   
+                        results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status)) 
 
-	            lastTime = currentTime
-	            lastEnergy = currentEnergy     	
+                lastTime = currentTime
+                lastEnergy = currentEnergy         
 
-	    return results            	
+        return results                
         
     def compute_results(self, assets_id_list):
         """ do the main computing and detect lights energy consumption not as programmed
@@ -513,7 +513,7 @@ class LightsNotAsProgrammed:
             print(count)
             results += self.find_energy_consumption_not_as_programmed(asset_id, start_time, end_time)
 
-        return results                          	
+        return results                              
 
     def write_to_file(self, results):
         """ write results to output file
@@ -524,7 +524,7 @@ class LightsNotAsProgrammed:
             title_row = ('region', 'asset_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'nominal_wattage', 'timestamp_start', 'timestamp_end', 'calendar_percentage', 'actual_wattage', 'error_type')         
             csvWriter.writerow(title_row)
             for record in results:
-                csvWriter.writerow(record)    	
+                csvWriter.writerow(record)        
 
     def run(self):
         """  call this method to run the program
@@ -555,7 +555,7 @@ class LightsNotAsProgrammed:
         print("finished computing") 
 
         self.write_to_file(results)
-        print("finished output to files")    	
+        print("finished output to files")        
 
 
 if __name__ == "__main__":

@@ -439,8 +439,8 @@ class LightsNotAsProgrammed:
 	            sunset_time_higher_boundary = sunset_time + shape_sunset_offset_time + self.sunsetTimeDelta
 	            calendar_percentage = int(calendar_item['item_percent']) 
                 
-                # the status is an indicator (1: dayburner, 2: night time outage, 0: normal)
-                status = 0
+                # the status is an indicator ('normal', 'dayburner', 'night_outage', 'night_not_dimming')
+                status = 'normal'
                 secondsInterval = (currentTime - lastTime).total_seconds()
                 energyConsumed = currentEnergy - lastEnergy
                 
@@ -455,15 +455,25 @@ class LightsNotAsProgrammed:
 	                # this is the day time, check if it is a dayburning interval
 	                if consumptionRate > nominal_wattage * self.nominal_wattage_ratio + self.energyThreshold and consumptionRate < 5 * nominal_wattage:
 	                	# this is a dayburning interval
-	                	status = 1
-	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, 0, consumptionRate))
+	                	status = 'dayburner'
+	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, 0, consumptionRate, status))
 
 	            elif currentTime < sunrise_time_lower_boundary or currentTime > sunset_time_higher_boundary:
 	                # this is the night time, check if the energy consumption following calendars
-	                if consumptionRate < nominal_wattage * (calendar_percentage * 0.01 - 0.1) or consumptionRate > nominal_wattage * (calendar_percentage * 0.01 + 0.1):
-	                	# the actal wattage is outside the calendar percentage -/+ 10% range, it doesn't follow the calendars, report it 
-	                	status = 2
-	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate))
+	                if consumptionRate < nominal_wattage * (calendar_percentage * 0.01 - 0.1):
+	                	# the actal wattage is below the (calendar percentage - 10%) * nominal_wattage, it is night time outage 
+	                	status = 'night_outage'
+	                	results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
+
+	                elif consumptionRate > nominal_wattage * (calendar_percentage * 0.01 + 0.1) and consumptionRate <= nominal_wattage * (1 + 0.1):
+	                    # the actual wattage is above the (calendar percentage + 10%) * nominal_wattage and below 110% * nominal_wattage, it is night not dimming
+	                    status = 'night_not_dimming'
+	                    results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status))
+
+	                elif consumptionRate > nominal_wattage * (1 + 0.1):
+	                	# the actual wattage is above 110% * nominal_wattage, it is actual wattage above nominal wattage
+	                    status = 'actual_above_nominal_wattage'   
+	                    results.append((self.pg_dbname, asset_id, latitude, longitude, installation_date, commissioning_date, street_name, nominal_wattage, lastTime, currentTime, calendar_percentage, consumptionRate, status)) 
 
 	            lastTime = currentTime
 	            lastEnergy = currentEnergy     	
@@ -511,7 +521,7 @@ class LightsNotAsProgrammed:
         """
         with open(self.outputFilename, "w") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=',')   
-            title_row = ('region', 'asset_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'nominal_wattage', 'timestamp_start', 'timestamp_end', 'calendar_percentage', 'energyConsumedWatts')         
+            title_row = ('region', 'asset_id', 'latitude', 'longitude', 'installation_date', 'commissioning_date', 'street_name', 'nominal_wattage', 'timestamp_start', 'timestamp_end', 'calendar_percentage', 'actual_wattage', 'error_type')         
             csvWriter.writerow(title_row)
             for record in results:
                 csvWriter.writerow(record)    	

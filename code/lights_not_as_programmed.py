@@ -371,6 +371,7 @@ class LightsNotAsProgrammed:
         street_name = self.assets_street_name_dict[asset_id]
         nominal_wattage = self.assets_nominal_wattage_dict[asset_id]
 
+        print("asset id: ", asset_id)
         # get calendars for this asset from XML
         calendar_xml_str = self.get_xml_with_asset_id(asset_id)
         # calendars is a list of 7 dictionaries (shapes), each of which correponds to one day in a week, starting from Sunday
